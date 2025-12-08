@@ -2,10 +2,9 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'medication_information_profile.dart';
-import 'MedicationData.dart';
-import 'add_medication_1.dart';
 import 'nearby_pharmacy.dart';
+import '../../controller/medication_service.dart';
+import '../../model/medication.dart';
 
 class MedicationListView extends StatefulWidget {
   const MedicationListView({Key? key}) : super(key: key);
@@ -15,571 +14,240 @@ class MedicationListView extends StatefulWidget {
 }
 
 class _MedicationListViewState extends State<MedicationListView> {
-  String? medNickName,
-      medName,
-      medPic,
-      adheranceRate,
-      supplyRate,
-      completionRate;
+  final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  _medicationQuery(index) {
-    Map medDetails = medications.values.elementAt(index);
-    return {
-      medNickName = medDetails['MedNickName'],
-      medName = medDetails['MedName'],
-      medPic = medDetails['MedPic'],
-      adheranceRate = medDetails['AdheranceRate'],
-      supplyRate = medDetails['SupplyRate'],
-      completionRate = medDetails['CompletionRate'],
-    };
+  @override
+  void initState() {
+    super.initState();
+    MedicationService().loadMedications();
   }
 
   @override
   Widget build(BuildContext context) {
-    // If no medications
-    if (medications.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(10, 10, 10, 10),
+    return ValueListenableBuilder<List<Medication>>(
+      valueListenable: MedicationService().medicationsNotifier,
+      builder: (context, medications, child) {
+        if (medications.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
               child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 214,
-                    height: 324,
-                    decoration: BoxDecoration(
-                      color: const Color(0x4D95B8D1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(15, 15, 15, 5),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0, 10, 0, 0),
-                            child: Image.asset(
-                              'assets/images/doctor.png',
-                              width: 100,
-                              height: 158,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0, 15, 0, 0),
-                            child: Text(
-                              'No Meds Found!',
-                              style: GoogleFonts.signikaNegative(
-                                color: Colors.black,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0, 10, 0, 0),
-                            child: Text(
-                              'OOPS! Looks like your medication list is empty.',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.signikaNegative(
-                                color: Colors.black,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w300,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                  Text(
+                    "No medications added yet.",
+                    style: GoogleFonts.signikaNegative(
+                      fontSize: 18,
+                      color: Colors.grey,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(0, 30, 0, 0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF809BCE),
-                          minimumSize: const Size(175, 40),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(20)),
-                          )),
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const AddMedication1()));
-                      },
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.add,
-                            size: 16,
-                          ),
-                          Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  10, 0, 0, 0),
-                              child: Text(
-                                'ADD MEDICATION',
-                                style: GoogleFonts.signikaNegative(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              )),
-                        ],
-                      ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Click the + button below to add one.",
+                    style: GoogleFonts.signikaNegative(
+                      fontSize: 14,
+                      color: Colors.grey,
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      );
-    }
+          );
+        }
 
-    // If got medications
-    else {
-      return ListView.separated(
+        return ListView.builder(
+          padding: EdgeInsets.zero,
           primary: false,
           shrinkWrap: true,
-          separatorBuilder: (BuildContext context, int index) =>
-              const Divider(),
-          padding: const EdgeInsetsDirectional.fromSTEB(20, 20, 20, 0),
+          scrollDirection: Axis.vertical,
           itemCount: medications.length,
           itemBuilder: (context, index) {
-            _medicationQuery(index);
-            return Material(
-                color: Colors.transparent,
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: const Color(0xFF79747E),
-                      width: 2,
-                    ),
+            Medication med = medications[index];
+            return Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 0),
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: const [
+                    BoxShadow(
+                      blurRadius: 5,
+                      color: Color(0x2E000000),
+                      offset: Offset(0, 2),
+                    )
+                  ],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFFC8C8C8),
+                    width: 1,
                   ),
-                  child: Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(15, 15, 15, 15),
-                    child: Row(
+                ),
+                child: ExpandableNotifier(
+                  initialExpanded: false,
+                  child: ExpandablePanel(
+                    header: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        Expanded(
-                          child: Container(
-                            width: double.infinity,
-                            color: Colors.white,
-                            child: ExpandableNotifier(
-                              initialExpanded: false,
-                              child: ExpandablePanel(
-                                header: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Image.asset(
-                                      medPic!,
-                                      width: 50,
-                                      height: 50,
-                                      fit: BoxFit.cover,
-                                    ),
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsetsDirectional
-                                            .fromSTEB(20, 0, 0, 0),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              children: [
-                                                Text(
-                                                  medName!, // 'Coughing Medicine',
-                                                  style: GoogleFonts
-                                                      .signikaNegative(
-                                                    color: Colors.black,
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(0, 5, 0, 0),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    medNickName!, // 'Benzonatate',
-                                                    style: GoogleFonts
-                                                        .signikaNegative(
-                                                      color: Colors.black,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                collapsed: Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      70, 5, 0, 0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'More details',
-                                        style: GoogleFonts.signikaNegative(
-                                          color: Colors.black,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w300,
-                                          fontStyle: FontStyle.italic,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                expanded: Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      0, 20, 0, 0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        flex: 5,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.max,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(9, 0, 0, 0),
-                                              child: Text(
-                                                'Adherance Rate',
-                                                textAlign: TextAlign.start,
-                                                style:
-                                                    GoogleFonts.signikaNegative(
-                                                  color: Colors.black,
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(9, 3, 0, 0),
-                                              child: Text(
-                                                adheranceRate!, // '100%',
-                                                textAlign: TextAlign.start,
-                                                style:
-                                                    GoogleFonts.signikaNegative(
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.normal,
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(0, 3, 1, 0),
-                                              child: LinearPercentIndicator(
-                                                percent: double.parse(
-                                                        adheranceRate!
-                                                            .replaceAll(
-                                                                RegExp('%'),
-                                                                '')) /
-                                                    100,
-                                                width: 130,
-                                                lineHeight: 5,
-                                                animation: true,
-                                                progressColor:
-                                                    const Color(0xFF809BCE),
-                                                backgroundColor:
-                                                    const Color(0xFFF1F4F8),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(9, 25, 0, 0),
-                                              child: Text(
-                                                'Supply Rate',
-                                                textAlign: TextAlign.start,
-                                                style:
-                                                    GoogleFonts.signikaNegative(
-                                                        color: Colors.black,
-                                                        fontSize: 15,
-                                                        fontWeight:
-                                                            FontWeight.w600),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(9, 3, 0, 0),
-                                              child: Text(
-                                                supplyRate!, // '20%',
-                                                textAlign: TextAlign.start,
-                                                style:
-                                                    GoogleFonts.signikaNegative(
-                                                        color: Colors.black,
-                                                        fontWeight:
-                                                            FontWeight.normal),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(0, 3, 1, 0),
-                                              child: LinearPercentIndicator(
-                                                percent: double.parse(
-                                                        supplyRate!.replaceAll(
-                                                            RegExp('%'), '')) /
-                                                    100,
-                                                width: 130,
-                                                lineHeight: 5,
-                                                animation: true,
-                                                progressColor:
-                                                    const Color(0xFF809BCE),
-                                                backgroundColor:
-                                                    const Color(0xFFD3D6E7),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 5,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.max,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(9, 0, 0, 0),
-                                              child: Text(
-                                                'Completion Rate',
-                                                textAlign: TextAlign.start,
-                                                style:
-                                                    GoogleFonts.signikaNegative(
-                                                  color: Colors.black,
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(9, 3, 0, 0),
-                                              child: Text(
-                                                completionRate!, // ''50%',
-                                                textAlign: TextAlign.start,
-                                                style:
-                                                    GoogleFonts.signikaNegative(
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.normal,
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(0, 3, 1, 0),
-                                              child: LinearPercentIndicator(
-                                                percent: double.parse(
-                                                        completionRate!
-                                                            .replaceAll(
-                                                                RegExp('%'),
-                                                                '')) /
-                                                    100,
-                                                width: 130,
-                                                lineHeight: 5,
-                                                animation: true,
-                                                progressColor:
-                                                    const Color(0xFF809BCE),
-                                                backgroundColor:
-                                                    const Color(0xFFD3D6E7),
-                                              ),
-                                            ),
-                                            Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsetsDirectional
-                                                          .fromSTEB(
-                                                          0, 30, 5, 0),
-                                                  child: ElevatedButton(
-                                                    style: ElevatedButton
-                                                        .styleFrom(
-                                                      backgroundColor:
-                                                          const Color(
-                                                              0xFF809BCE),
-                                                      minimumSize:
-                                                          const Size(80, 30),
-                                                      elevation: 5,
-                                                      shape:
-                                                          const RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    50)),
-                                                      ),
-                                                    ),
-                                                    onPressed: () {
-                                                      Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: (context) =>
-                                                                  const NearbyPharmacyWidget()));
-                                                    },
-                                                    child: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Padding(
-                                                            padding:
-                                                                const EdgeInsetsDirectional
-                                                                    .fromSTEB(
-                                                                    0, 0, 0, 0),
-                                                            child: Text(
-                                                              'RESTOCK',
-                                                              style: GoogleFonts
-                                                                  .signikaNegative(
-                                                                      color: Colors
-                                                                          .white,
-                                                                      fontSize:
-                                                                          12,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w500),
-                                                            )),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsetsDirectional
-                                                          .fromSTEB(
-                                                          0, 30, 0, 0),
-                                                  child: ElevatedButton(
-                                                    style: ElevatedButton
-                                                        .styleFrom(
-                                                            backgroundColor:
-                                                                const Color(
-                                                                    0xFF809BCE),
-                                                            minimumSize:
-                                                                const Size(
-                                                                    65, 30),
-                                                            elevation: 5,
-                                                            shape:
-                                                                const RoundedRectangleBorder(
-                                                              borderRadius: BorderRadius
-                                                                  .all(Radius
-                                                                      .circular(
-                                                                          50)),
-                                                            )),
-                                                    onPressed: () {
-                                                      Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: (context) =>
-                                                                  MedicationInformationProfileWidget(
-                                                                      index:
-                                                                          index)));
-                                                    },
-                                                    child: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Padding(
-                                                            padding:
-                                                                const EdgeInsetsDirectional
-                                                                    .fromSTEB(
-                                                                    0, 0, 0, 0),
-                                                            child: Text(
-                                                              'INFO',
-                                                              style: GoogleFonts
-                                                                  .signikaNegative(
-                                                                      color: Colors
-                                                                          .white,
-                                                                      fontSize:
-                                                                          12,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w500),
-                                                            )),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                theme: const ExpandableThemeData(
-                                  tapHeaderToExpand: true,
-                                  tapBodyToExpand: false,
-                                  tapBodyToCollapse: false,
-                                  headerAlignment:
-                                      ExpandablePanelHeaderAlignment.center,
-                                  hasIcon: true,
-                                  expandIcon: Icons.keyboard_arrow_down,
-                                  collapseIcon: Icons.keyboard_arrow_up,
-                                  iconPadding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                                ),
+                        Row(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(0),
+                                bottomRight: Radius.circular(0),
+                                topLeft: Radius.circular(8),
+                                topRight: Radius.circular(0),
+                              ),
+                              child: Image.asset(
+                                'assets/images/medicine.png', // Default image for now
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
                               ),
                             ),
+                            Expanded(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 0, 0),
+                                    child: Text(
+                                      med.medName,
+                                      style: GoogleFonts.signikaNegative(
+                                        color: Colors.black,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 0, 0),
+                                    child: Text(
+                                      med.medNickName ?? '',
+                                      style: GoogleFonts.signikaNegative(
+                                        color: const Color(0xFF57636C),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(12, 8, 0, 0),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Text(
+                                          'Completion',
+                                          style: GoogleFonts.signikaNegative(
+                                            color: const Color(0xFF57636C),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.normal,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 0, 0),
+                                          child: LinearPercentIndicator(
+                                            percent: 0.5, // Placeholder
+                                            width: 80,
+                                            lineHeight: 8,
+                                            animation: true,
+                                            progressColor: const Color(0xFF809BCE),
+                                            backgroundColor: const Color(0xFFE0E3E7),
+                                            barRadius: const Radius.circular(8),
+                                            padding: EdgeInsets.zero,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsetsDirectional.fromSTEB(8, 0, 0, 0),
+                                          child: Text(
+                                            '50%', // Placeholder
+                                            style: GoogleFonts.signikaNegative(
+                                              color: const Color(0xFF14181B),
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.normal,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    collapsed: Container(),
+                    expanded: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: Color(0xFFC8C8C8),
+                        ),
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 12),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Medication Details:',
+                                style: GoogleFonts.signikaNegative(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text('Type: ${med.medType}'),
+                              Text('Provider: ${med.medProvider}'),
+                              Text('Dosage: ${med.dosage} ${med.dosageUnit}'),
+                              Text('Frequency: ${med.frequencyPerDay}'),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => const NearbyPharmacyWidget()));
+                                    },
+                                    child: const Text("Restock"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                       MedicationService().deleteMedication(index);
+                                    },
+                                    child: const Text("Delete", style: TextStyle(color: Colors.red)),
+                                  )
+                                ],
+                              )
+                            ],
                           ),
                         ),
                       ],
                     ),
+                    theme: const ExpandableThemeData(
+                      tapHeaderToExpand: true,
+                      tapBodyToExpand: false,
+                      tapBodyToCollapse: false,
+                      headerAlignment: ExpandablePanelHeaderAlignment.center,
+                      hasIcon: true,
+                    ),
                   ),
-                ));
-          });
-    }
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }

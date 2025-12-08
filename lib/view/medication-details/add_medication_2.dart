@@ -3,9 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'add_medication_1.dart';
 import 'add_medication_3.dart';
 import 'InputValidation.dart';
+import '../../model/medication.dart';
 
 class AddMedication2 extends StatefulWidget {
-  const AddMedication2({Key? key}) : super(key: key);
+  final Medication medication;
+  const AddMedication2({Key? key, required this.medication}) : super(key: key);
 
   @override
   _AddMedication2State createState() => _AddMedication2State();
@@ -13,9 +15,8 @@ class AddMedication2 extends StatefulWidget {
 
 class _AddMedication2State extends State<AddMedication2>
     with InputValidationMixin {
-  late TextEditingController formInputController1;
-  late TextEditingController formInputController2;
-  String? dropDownValue1 = 'Pills';
+  late TextEditingController formInputController1; // Stock
+  late TextEditingController formInputController2; // Days
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final formKey = GlobalKey<FormState>();
 
@@ -24,6 +25,13 @@ class _AddMedication2State extends State<AddMedication2>
     super.initState();
     formInputController1 = TextEditingController();
     formInputController2 = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    formInputController1.dispose();
+    formInputController2.dispose();
+    super.dispose();
   }
 
   @override
@@ -144,6 +152,7 @@ class _AddMedication2State extends State<AddMedication2>
                                           padding: const EdgeInsetsDirectional
                                               .fromSTEB(0, 5, 0, 0),
                                           child: TextFormField(
+                                              controller: formInputController1,
                                               keyboardType:
                                                   TextInputType.number,
                                               obscureText: false,
@@ -181,10 +190,6 @@ class _AddMedication2State extends State<AddMedication2>
                                                     const EdgeInsetsDirectional
                                                         .fromSTEB(20, 0, 20, 0),
                                               ),
-                                              onSaved: (String? value) {
-                                                //save
-                                                print("saved");
-                                              },
                                               validator: (String? value) {
                                                 if (value == null ||
                                                     value.isEmpty) {
@@ -225,6 +230,7 @@ class _AddMedication2State extends State<AddMedication2>
                                           padding: const EdgeInsetsDirectional
                                               .fromSTEB(0, 5, 0, 0),
                                           child: TextFormField(
+                                              controller: formInputController2,
                                               obscureText: false,
                                               style:
                                                   GoogleFonts.signikaNegative(
@@ -262,10 +268,6 @@ class _AddMedication2State extends State<AddMedication2>
                                                     const EdgeInsetsDirectional
                                                         .fromSTEB(20, 0, 20, 0),
                                               ),
-                                              onSaved: (String? value) {
-                                                //save
-                                                print("saved");
-                                              },
                                               validator: (String? value) {
                                                 if (value == null ||
                                                     value.isEmpty) {
@@ -306,11 +308,16 @@ class _AddMedication2State extends State<AddMedication2>
                                             if (formKey.currentState!
                                                 .validate()) {
                                               formKey.currentState?.save();
+
+                                              // Update Medication Object
+                                              widget.medication.dosageStock = formInputController1.text;
+                                              widget.medication.lowSupplyNotif = formInputController2.text;
+
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
                                                       builder: (context) =>
-                                                          const AddMedication3()));
+                                                          AddMedication3(medication: widget.medication)));
                                             }
                                           },
                                           child: Row(

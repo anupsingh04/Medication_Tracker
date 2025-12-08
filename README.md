@@ -72,9 +72,9 @@ lib/
 ### 4. Medication List
 - **File:** `view/medication-details/medication_list.dart`
 - **Features:**
-    - Lists active medications using `MedicationListView` and data from `MedicationData.dart`.
-    - **Actions:** Delete (placeholder), History (`JournalHistoryWidget`), Edit (placeholder), and Add (`AddMedication1`).
-    - **Data Source:** `lib/view/medication-details/MedicationData.dart` contains a map of medication details (Name, Dosage, Frequency, Provider, etc.).
+    - Lists active medications using `MedicationListView` and data from `MedicationService`.
+    - **Actions:** Delete, History (`JournalHistoryWidget`), Edit (placeholder), and Add (`AddMedication1`).
+    - **Data Source:** `lib/controller/medication_service.dart` manages the list of medications using `shared_preferences` for local storage.
 
 ### 5. Schedule
 - **File:** `view/Medication_Schedule/Schedule.dart`

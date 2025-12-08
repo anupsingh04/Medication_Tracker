@@ -3,9 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'add_medication_2.dart';
 import 'InputValidation.dart';
 import '../../nav.dart';
+import '../../model/medication.dart';
+import '../../controller/medication_service.dart';
 
 class AddMedication3 extends StatefulWidget {
-  const AddMedication3({Key? key}) : super(key: key);
+  final Medication medication;
+  const AddMedication3({Key? key, required this.medication}) : super(key: key);
 
   @override
   _AddMedication3State createState() => _AddMedication3State();
@@ -28,6 +31,12 @@ class _AddMedication3State extends State<AddMedication3>
   void initState() {
     super.initState();
     formInputController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    formInputController.dispose();
+    super.dispose();
   }
 
   // Selecting start date method
@@ -626,10 +635,6 @@ class _AddMedication3State extends State<AddMedication3>
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.normal,
                                               ),
-                                              onSaved: (String? value) {
-                                                //save
-                                                print("saved");
-                                              },
                                               validator: (String? value) {
                                                 if (value == null ||
                                                     value.isEmpty) {
@@ -843,16 +848,26 @@ class _AddMedication3State extends State<AddMedication3>
                                                 borderRadius: BorderRadius.all(
                                                     Radius.circular(10)),
                                               )),
-                                          onPressed: () {
+                                          onPressed: () async {
                                             if (formKey.currentState!
                                                 .validate()) {
                                               formKey.currentState?.save();
+
+                                              // Update Medication Object
+                                              widget.medication.startDate = startDate.toString();
+                                              widget.medication.endDate = endDate.toString();
+                                              widget.medication.frequencyPerWeek = dropDownValue1;
+                                              widget.medication.frequencyPerDay = dropDownValue2;
+                                              widget.medication.dosage = formInputController.text;
+                                              widget.medication.dosageUnit = dropDownValue3;
+                                              widget.medication.medicineIntakeNotif = dropDownValue4;
+
+                                              // Save to local storage
+                                              await MedicationService().addMedication(widget.medication);
+
+                                              // Return to main screen
+                                              Navigator.popUntil(context, (route) => route.isFirst);
                                             }
-                                            var count = 0;
-                                            Navigator.popUntil(context,
-                                                (route) {
-                                              return count++ == 3;
-                                            });
                                           },
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
