@@ -9,7 +9,7 @@ import '../../model/medication.dart';
 import '../medication-details/nearby_pharmacy.dart';
 import '../medication-details/add_medication_1.dart';
 import '../medication-details/journal_history.dart';
-import '../profile/Profile.dart'; // For settings/profile navigation if needed
+import '../profile/Profile.dart';
 
 class HomePageWidget extends StatefulWidget {
   const HomePageWidget({Key? key}) : super(key: key);
@@ -33,20 +33,37 @@ class _HomePageWidgetState extends State<HomePageWidget> {
       key: scaffoldKey,
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
-        child: ValueListenableBuilder<List<Medication>>(
-          valueListenable: MedicationService().medicationsNotifier,
-          builder: (context, medications, child) {
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  _buildHeader(),
-                  _buildAlerts(medications),
-                  _buildNowSection(medications),
-                  _buildUpcomingSection(medications),
-                  _buildBottomActions(context),
-                  const SizedBox(height: 20),
-                ],
-              ),
+        child: ValueListenableBuilder<DateTime>(
+          valueListenable: MedicationService().lastUpdateNotifier,
+          builder: (context, _, __) {
+            return FutureBuilder<List<dynamic>>(
+              future: Future.wait([
+                MedicationService().getDueMedications(DateTime.now()),
+                MedicationService().getDailyProgress(DateTime.now()),
+                Future.value(MedicationService().medicationsNotifier.value) // Just to access full list for alerts
+              ]),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                List<MedicationScheduleItem> schedule = snapshot.data![0] as List<MedicationScheduleItem>;
+                double progress = snapshot.data![1] as double;
+                List<Medication> allMeds = snapshot.data![2] as List<Medication>;
+
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _buildHeader(progress),
+                      _buildAlerts(allMeds),
+                      _buildNowSection(schedule),
+                      _buildUpcomingSection(schedule),
+                      _buildBottomActions(context),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                );
+              },
             );
           },
         ),
@@ -54,8 +71,10 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(double progress) {
     String formattedDate = DateFormat('EEEE, MMM d').format(DateTime.now());
+    int percentage = (progress * 100).toInt();
+
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
@@ -102,11 +121,11 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               CircularPercentIndicator(
                 radius: 40.0,
                 lineWidth: 8.0,
-                percent: 0.25, // Mock progress
+                percent: progress,
                 center: Text(
-                  "1 of 4",
+                  "$percentage%",
                   style: GoogleFonts.signikaNegative(
-                    fontSize: 12,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -121,15 +140,12 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   }
 
   Widget _buildAlerts(List<Medication> medications) {
-    // Logic: Find meds with low stock (e.g. < 5)
-    // Since dosageStock is String, we try to parse it.
-    // This is a simple implementation for the UI requirement.
     Medication? lowStockMed;
     for (var med in medications) {
       int? stock = int.tryParse(med.dosageStock ?? '');
       if (stock != null && stock < 5) {
         lowStockMed = med;
-        break; // Just show one alert for now
+        break;
       }
     }
 
@@ -193,21 +209,49 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     );
   }
 
-  Widget _buildNowSection(List<Medication> medications) {
-    if (medications.isEmpty) {
-      return Padding(
+  Widget _buildNowSection(List<MedicationScheduleItem> schedule) {
+    // Find first item that is not 'Taken' or 'Skipped'
+    // Actually we might want to show snoozed ones too.
+    // Let's filter for 'Pending' or 'Snoozed'.
+
+    // Sort logic already puts them in time order.
+
+    // Check if there are any items for today at all
+    if (schedule.isEmpty) {
+       return Padding(
         padding: const EdgeInsets.all(20.0),
         child: Center(
           child: Text(
-            "No active medications.",
+            "No medications scheduled for today.",
             style: GoogleFonts.signikaNegative(fontSize: 16, color: Colors.grey),
           ),
         ),
       );
     }
 
-    // Pick the first one as "NOW"
-    Medication currentMed = medications.first;
+    MedicationScheduleItem? nextItem;
+    try {
+      nextItem = schedule.firstWhere((item) => item.status == 'Pending' || item.status == 'Snoozed');
+    } catch (e) {
+      // All done
+      return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Center(
+          child: Column(
+            children: [
+              const Icon(Icons.check_circle_outline, size: 60, color: Color(0xFF809BCE)),
+              const SizedBox(height: 10),
+              Text(
+                "All caught up for today!",
+                style: GoogleFonts.signikaNegative(fontSize: 18, color: Colors.grey[700]),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Medication med = nextItem.medication;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -215,7 +259,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "## NOW (Due: 9:00 AM)", // Hardcoded time as per requirement mock
+            "## NOW (Due: ${nextItem.time})",
             style: GoogleFonts.signikaNegative(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -247,10 +291,11 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                     color: Colors.grey[100],
                   ),
                   clipBehavior: Clip.antiAlias,
-                  child: (currentMed.imagePath != null && currentMed.imagePath!.isNotEmpty)
+                  child: (med.imagePath != null && med.imagePath!.isNotEmpty)
                       ? Image.file(
-                          File(currentMed.imagePath!),
+                          File(med.imagePath!),
                           fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Image.asset('assets/images/medicine.png'),
                         )
                       : Image.asset(
                           'assets/images/medicine.png',
@@ -259,14 +304,15 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 ),
                 const SizedBox(height: 15),
                 Text(
-                  "${currentMed.medName} - ${currentMed.dosage ?? '? '}${currentMed.dosageUnit ?? ''}",
+                  "${med.medName} - ${med.dosage ?? '? '}${med.dosageUnit ?? ''}",
                   style: GoogleFonts.signikaNegative(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                if (med.medType != null)
                 Text(
-                  "Take after breakfast",
+                  med.medType!,
                   style: GoogleFonts.signikaNegative(
                     fontSize: 16,
                     color: Colors.grey[600],
@@ -278,14 +324,20 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _actionButton("TAKEN", const Color(0xFF4CAF50), Colors.white),
-                      _actionButton("SNOOZE", const Color(0xFFFFC107), Colors.black),
+                      _actionButton("TAKEN", const Color(0xFF4CAF50), Colors.white, () {
+                        MedicationService().logIntake(med.id, nextItem!.time, 'Taken', DateTime.now());
+                      }),
+                      _actionButton("SNOOZE", const Color(0xFFFFC107), Colors.black, () {
+                         MedicationService().logIntake(med.id, nextItem!.time, 'Snoozed', DateTime.now());
+                      }),
                     ],
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 20),
-                  child: _actionButton("SKIP", const Color(0xFFEF5350), Colors.white),
+                  child: _actionButton("SKIP", const Color(0xFFEF5350), Colors.white, () {
+                    MedicationService().logIntake(med.id, nextItem!.time, 'Skipped', DateTime.now());
+                  }),
                 ),
               ],
             ),
@@ -295,11 +347,9 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     );
   }
 
-  Widget _actionButton(String label, Color bg, Color text) {
+  Widget _actionButton(String label, Color bg, Color text, VoidCallback onTap) {
     return ElevatedButton(
-      onPressed: () {
-        // Todo: Implement action logic
-      },
+      onPressed: onTap,
       style: ElevatedButton.styleFrom(
         backgroundColor: bg,
         foregroundColor: text,
@@ -315,11 +365,22 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     );
   }
 
-  Widget _buildUpcomingSection(List<Medication> medications) {
-    if (medications.length < 2) return const SizedBox.shrink();
+  Widget _buildUpcomingSection(List<MedicationScheduleItem> schedule) {
+    // Filter for pending items that are NOT the "Now" item
+    // Actually, just list everything and mark status
+    // OR list subsequent pending items.
 
-    // Show remaining meds
-    List<Medication> upcoming = medications.sublist(1);
+    // Let's list everything for today to give a full view, or just upcoming?
+    // User asked for "Upcoming".
+
+    // Let's filter items that are AFTER the current time, or just all items not "Taken"?
+    // A clean approach is to list all items, but highlight status.
+    // Or strictly "Upcoming" = Pending items excluding the one in "Now".
+
+    var pendingItems = schedule.where((i) => i.status == 'Pending' || i.status == 'Snoozed').toList();
+    if (pendingItems.isEmpty || pendingItems.length == 1) return const SizedBox.shrink(); // Only 0 or 1 (which is in Now)
+
+    List<MedicationScheduleItem> upcoming = pendingItems.sublist(1);
 
     return Padding(
       padding: const EdgeInsets.all(20),
@@ -344,19 +405,19 @@ class _HomePageWidgetState extends State<HomePageWidget> {
             child: Column(
               children: upcoming.asMap().entries.map((entry) {
                 int idx = entry.key;
-                Medication med = entry.value;
+                MedicationScheduleItem item = entry.value;
                 return Column(
                   children: [
                     ListTile(
                       leading: Text(
-                        idx == 0 ? "1:00 PM" : "9:00 PM", // Mock times
+                        item.time,
                         style: GoogleFonts.signikaNegative(
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
                       ),
                       title: Text(
-                        "${med.medName} (${med.dosage ?? '1'} Tablet)",
+                        "${item.medication.medName} (${item.medication.dosage ?? '1'} ${item.medication.dosageUnit ?? ''})",
                         style: GoogleFonts.signikaNegative(),
                       ),
                       subtitle: Row(
@@ -364,7 +425,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                           const Icon(Icons.circle_outlined, size: 16, color: Colors.grey),
                           const SizedBox(width: 5),
                           Text(
-                            "Pending",
+                            item.status,
                             style: GoogleFonts.signikaNegative(color: Colors.grey),
                           ),
                         ],

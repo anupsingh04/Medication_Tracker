@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'add_medication_2.dart';
 import 'InputValidation.dart';
-import '../../nav.dart';
 import '../../model/medication.dart';
 import '../../controller/medication_service.dart';
 
@@ -18,13 +16,16 @@ class AddMedication3 extends StatefulWidget {
 class _AddMedication3State extends State<AddMedication3>
     with InputValidationMixin {
   String? dropDownValue1 = 'Once a week';
-  String? dropDownValue2 = 'Once daily';
+  // String? dropDownValue2 = 'Once daily'; // Removed in favor of explicit times
   String? dropDownValue3 = 'g';
   late TextEditingController formInputController;
   String? dropDownValue4 = '5 minutes before';
-  //late DateTime selectedDate = DateTime.now();
+
   DateTime startDate = DateTime.now();
   DateTime endDate = DateTime.now();
+
+  List<String> intakeTimes = []; // List of HH:mm strings
+
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final formKey = GlobalKey<FormState>();
 
@@ -37,9 +38,12 @@ class _AddMedication3State extends State<AddMedication3>
     if (widget.medication.frequencyPerWeek != null && widget.medication.frequencyPerWeek!.isNotEmpty) {
       dropDownValue1 = widget.medication.frequencyPerWeek;
     }
-    if (widget.medication.frequencyPerDay != null && widget.medication.frequencyPerDay!.isNotEmpty) {
-      dropDownValue2 = widget.medication.frequencyPerDay;
+
+    // Load existing times
+    if (widget.medication.intakeTimes.isNotEmpty) {
+      intakeTimes = List.from(widget.medication.intakeTimes);
     }
+
     if (widget.medication.dosageUnit != null && widget.medication.dosageUnit!.isNotEmpty) {
       dropDownValue3 = widget.medication.dosageUnit;
     }
@@ -98,6 +102,29 @@ class _AddMedication3State extends State<AddMedication3>
         endDate = endPicked;
       });
     }
+  }
+
+  // Select Time Method
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        final String formatted = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+        if (!intakeTimes.contains(formatted)) {
+          intakeTimes.add(formatted);
+          intakeTimes.sort();
+        }
+      });
+    }
+  }
+
+  void _removeTime(String time) {
+    setState(() {
+      intakeTimes.remove(time);
+    });
   }
 
   @override
@@ -468,7 +495,6 @@ class _AddMedication3State extends State<AddMedication3>
                                                     dropDownValue1 = val!;
                                                   });
                                                 },
-                                                // height: 35,
                                                 style:
                                                     GoogleFonts.signikaNegative(
                                                   color: Colors.black,
@@ -479,13 +505,11 @@ class _AddMedication3State extends State<AddMedication3>
                                                     const Color(0xFFE7E0EC),
                                                 focusColor: Colors.red,
                                                 isExpanded: true,
-                                                //margin: EdgeInsetsDirectional.fromSTEB(12,4,12,4),
                                                 elevation: 2,
                                                 underline: Container(
                                                   color:
                                                       const Color(0xFFE7E0EC),
                                                 )
-                                                // hidesUnderline: true,
                                                 ),
                                           ),
                                         ),
@@ -499,7 +523,7 @@ class _AddMedication3State extends State<AddMedication3>
                                         padding: const EdgeInsetsDirectional
                                             .fromSTEB(0, 20, 0, 0),
                                         child: Text(
-                                          'STEP 3: Frequency of Intake (PER DAY)',
+                                          'STEP 3: Intake Times',
                                           style: GoogleFonts.signikaNegative(
                                             color: Colors.black,
                                             fontWeight: FontWeight.w600,
@@ -508,77 +532,38 @@ class _AddMedication3State extends State<AddMedication3>
                                       ),
                                     ],
                                   ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.max,
+                                  // Replaced Dropdown with Time List
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Padding(
-                                        padding: const EdgeInsetsDirectional
-                                            .fromSTEB(0, 5, 0, 0),
-                                        child: Container(
-                                          width: 500,
-                                          height: 100,
-                                          constraints: BoxConstraints(
-                                            maxWidth: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.89,
-                                            maxHeight: 50,
+                                        padding: const EdgeInsets.only(top: 10),
+                                        child: Wrap(
+                                          spacing: 8.0,
+                                          runSpacing: 4.0,
+                                          children: intakeTimes.map((time) {
+                                            return Chip(
+                                              label: Text(time),
+                                              onDeleted: () => _removeTime(time),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 10),
+                                        child: ElevatedButton.icon(
+                                          icon: const Icon(Icons.add_alarm),
+                                          label: const Text("Add Time"),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(0xFF809BCE),
+                                            foregroundColor: Colors.white,
                                           ),
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFFE7E0EC),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(8)),
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsetsDirectional
-                                                .fromSTEB(15, 0, 10, 0),
-                                            child: DropdownButton<String>(
-                                                value: dropDownValue2,
-                                                icon: const Icon(
-                                                    Icons.keyboard_arrow_down),
-                                                items: <String>[
-                                                  'Once daily',
-                                                  'Twice daily',
-                                                  '3 times a day',
-                                                  '4 times a day',
-                                                  'Custom'
-                                                ].map<DropdownMenuItem<String>>(
-                                                    (String value) {
-                                                  return DropdownMenuItem<
-                                                      String>(
-                                                    value: value,
-                                                    child: Text(value),
-                                                  );
-                                                }).toList(),
-                                                onChanged: (String? val) {
-                                                  setState(() {
-                                                    dropDownValue2 = val!;
-                                                  });
-                                                },
-                                                // height: 35,
-                                                style:
-                                                    GoogleFonts.signikaNegative(
-                                                  color: Colors.black,
-                                                ),
-                                                hint: const Text(
-                                                    'Choose Frequency of Intake Per Day'),
-                                                dropdownColor:
-                                                    const Color(0xFFE7E0EC),
-                                                focusColor: Colors.red,
-                                                isExpanded: true,
-                                                //margin: EdgeInsetsDirectional.fromSTEB(12,4,12,4),
-                                                elevation: 2,
-                                                underline: Container(
-                                                  color:
-                                                      const Color(0xFFE7E0EC),
-                                                )
-                                                // hidesUnderline: true,
-                                                ),
-                                          ),
+                                          onPressed: () => _selectTime(context),
                                         ),
                                       ),
                                     ],
                                   ),
+
                                   Row(
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
@@ -718,7 +703,6 @@ class _AddMedication3State extends State<AddMedication3>
                                                     dropDownValue3 = val!;
                                                   });
                                                 },
-                                                // height: 35,
                                                 style:
                                                     GoogleFonts.signikaNegative(
                                                   color: Colors.black,
@@ -727,13 +711,11 @@ class _AddMedication3State extends State<AddMedication3>
                                                     const Color(0xFFE7E0EC),
                                                 focusColor: Colors.red,
                                                 isExpanded: true,
-                                                //margin: EdgeInsetsDirectional.fromSTEB(12,4,12,4),
                                                 elevation: 2,
                                                 underline: Container(
                                                   color:
                                                       const Color(0xFFE7E0EC),
                                                 )
-                                                // hidesUnderline: true,
                                                 ),
                                           ),
                                         ),
@@ -806,7 +788,6 @@ class _AddMedication3State extends State<AddMedication3>
                                                     dropDownValue4 = val!;
                                                   });
                                                 },
-                                                // height: 35,
                                                 style:
                                                     GoogleFonts.signikaNegative(
                                                   color: Colors.black,
@@ -817,37 +798,12 @@ class _AddMedication3State extends State<AddMedication3>
                                                     const Color(0xFFE7E0EC),
                                                 focusColor: Colors.red,
                                                 isExpanded: true,
-                                                //margin: EdgeInsetsDirectional.fromSTEB(12,4,12,4),
                                                 elevation: 2,
                                                 underline: Container(
                                                   color:
                                                       const Color(0xFFE7E0EC),
                                                 )
-                                                // hidesUnderline: true,
                                                 ),
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 50,
-                                        height: 50,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsetsDirectional
-                                              .fromSTEB(1, 0, 0, 0),
-                                          child: IconButton(
-                                            iconSize: 40,
-                                            color: Colors.white,
-                                            icon: const Icon(
-                                              Icons.add_circle,
-                                              color: Color(0xFF770FC0),
-                                              //size: 30,
-                                            ),
-                                            onPressed: () {},
                                           ),
                                         ),
                                       ),
@@ -882,10 +838,12 @@ class _AddMedication3State extends State<AddMedication3>
                                               widget.medication.startDate = startDate.toString();
                                               widget.medication.endDate = endDate.toString();
                                               widget.medication.frequencyPerWeek = dropDownValue1;
-                                              widget.medication.frequencyPerDay = dropDownValue2;
+                                              // widget.medication.frequencyPerDay = dropDownValue2; // Removed
+                                              widget.medication.frequencyPerDay = "${intakeTimes.length} times a day"; // Derived
                                               widget.medication.dosage = formInputController.text;
                                               widget.medication.dosageUnit = dropDownValue3;
                                               widget.medication.medicineIntakeNotif = dropDownValue4;
+                                              widget.medication.intakeTimes = intakeTimes; // Save times
 
                                               // Save to local storage
                                               if (widget.medication.medName.isNotEmpty) {

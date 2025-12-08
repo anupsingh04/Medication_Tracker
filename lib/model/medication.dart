@@ -1,4 +1,5 @@
 class Medication {
+  String id;
   String medName;
   String? medNickName;
   String? medType;
@@ -13,10 +14,12 @@ class Medication {
   String? dosage;
   String? dosageUnit;
   String? medicineIntakeNotif;
-  String? imagePath; // Added image path
+  String? imagePath;
+  List<String> intakeTimes; // List of "HH:mm" strings
 
   // Constructor
   Medication({
+    required this.id,
     required this.medName,
     this.medNickName,
     this.medType,
@@ -32,11 +35,13 @@ class Medication {
     this.dosageUnit,
     this.medicineIntakeNotif,
     this.imagePath,
+    this.intakeTimes = const [],
   });
 
   // Convert a Medication object into a Map
   Map<String, dynamic> toJson() {
     return {
+      'Id': id,
       'MedName': medName,
       'MedNickName': medNickName ?? '',
       'MedType': medType ?? 'Pills',
@@ -52,12 +57,14 @@ class Medication {
       'DosageUnit': dosageUnit ?? 'mg',
       'MedicineIntakeNotif': medicineIntakeNotif ?? '',
       'ImagePath': imagePath ?? '',
+      'IntakeTimes': intakeTimes,
     };
   }
 
   // Create a Medication object from a Map
   factory Medication.fromJson(Map<String, dynamic> json) {
     return Medication(
+      id: json['Id'] ?? DateTime.now().millisecondsSinceEpoch.toString(), // Fallback for old data
       medName: json['MedName'],
       medNickName: json['MedNickName'],
       medType: json['MedType'],
@@ -73,6 +80,7 @@ class Medication {
       dosageUnit: json['DosageUnit'],
       medicineIntakeNotif: json['MedicineIntakeNotif'],
       imagePath: json['ImagePath'],
+      intakeTimes: List<String>.from(json['IntakeTimes'] ?? []),
     );
   }
 }

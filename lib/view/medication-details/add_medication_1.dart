@@ -129,8 +129,6 @@ class _AddMedication1State extends State<AddMedication1>
                           ],
                         ),
                       ),
-                      // ... (rest of the UI is same as before, skipping redundant paste for brevity if I could, but I must provide full block)
-                      // I will paste the full content to be safe and ensure everything is correct.
                       Padding(
                         padding:
                             const EdgeInsetsDirectional.fromSTEB(10, 20, 10, 0),
@@ -629,7 +627,7 @@ class _AddMedication1State extends State<AddMedication1>
                                                         ?.save();
 
                                                     // Use existing medication object if editing, or create new
-                                                    Medication med = widget.medication ?? Medication(medName: '');
+                                                    Medication med = widget.medication ?? Medication(id: DateTime.now().millisecondsSinceEpoch.toString(), medName: '');
 
                                                     med.medName = formInputController1.text;
                                                     med.medNickName = formInputController2.text;
