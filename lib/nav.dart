@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'view/home/homepage.dart';
-import 'view/search/medication_search.dart';
+import 'view/search/health_chat.dart';
 import 'view/medication-details/medication_list.dart';
 import 'view/Medication_Schedule/Schedule.dart';
 import 'view/profile/Profile.dart';
@@ -15,7 +15,7 @@ class Nav extends StatefulWidget {
 class _NavState extends State<Nav> {
   int _selectedIndex = 2;
   final List<Widget> _widgetOptions = <Widget>[
-    const MedicationResultWidget(),
+    const HealthChatWidget(),
     const MedicationList(),
     const HomePageWidget(),
     const Schedule(),
@@ -32,10 +32,9 @@ class _NavState extends State<Nav> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
-      children: [Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
-    ]),
+      index: _selectedIndex, // Corrected from using children inside a Stack manually, IndexedStack handles it properly with index
+      children: _widgetOptions,
+    ),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
           canvasColor: const Color(0xFF809BCE),
@@ -47,9 +46,9 @@ class _NavState extends State<Nav> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(
-              Icons.search,
+              Icons.chat_bubble_outline,
             ),
-            label: 'Search',
+            label: 'Chat', // Changed label from Search
           ),
           BottomNavigationBarItem(
             icon: Icon(
