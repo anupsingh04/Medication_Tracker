@@ -2,19 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'ScheduleData.dart';
+import '../../controller/medication_service.dart';
+import '../../model/medication.dart';
 
-final List<String> questions = [
-  'Before Breakfast',
-  'After Breakfast',
-  'Before Lunch',
-  'After Lunch',
-  'Before Dinner',
-  'After Dinner',
-  'Bedtime'
-];
-
-// Schedule Class
 class Schedule extends StatefulWidget {
   const Schedule({Key? key}) : super(key: key);
 
@@ -23,206 +13,206 @@ class Schedule extends StatefulWidget {
 }
 
 class _ScheduleState extends State<Schedule> {
-  // Convert List String to NextLine String
-  String multipleString(value) {
-    StringBuffer sb = StringBuffer();
-    for (String meds in value) {
-      (meds == value.last) ? sb.write(meds) : sb.write(meds + "\n");
-    }
-    return sb.toString();
-  }
+  // Calendar
+  CalendarFormat _calendarFormat = CalendarFormat.week;
+  DateTime _focusedDay = DateTime.now();
+  final DateTime _firstDay = DateTime.utc(2000, 1, 1);
+  final DateTime _lastDay = DateTime.utc(2030, 31, 31);
+  DateTime _selectedDay = DateTime.now();
+
+  List<MedicationScheduleItem> _scheduleItems = [];
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _MedicationQuery(DateTime.now());
+    _fetchSchedule(_selectedDay);
   }
 
-  // Calendar
-  CalendarFormat _calendarFormat = CalendarFormat.month;
-  DateTime _focusedDay = DateTime.now();
-  final DateTime _firstDay = DateTime.utc(2000, 1, 1);
-  final DateTime _lastDay = DateTime.utc(2030, 31, 31);
-  DateTime? _selectedDay;
-
-  _MedicationQuery(day) {
-    String selectedDay = DateFormat("dd/MM/yyyy").format(day);
-    return records.keys.toList().any((item) => item == selectedDay)
-        ? records[selectedDay]!.values.toList()
-        : [];
+  Future<void> _fetchSchedule(DateTime date) async {
+    setState(() {
+      _isLoading = true;
+    });
+    List<MedicationScheduleItem> items = await MedicationService().getDueMedications(date);
+    setState(() {
+      _scheduleItems = items;
+      _isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: NestedScrollView(
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-        return [
-          SliverAppBar(
-            title: Text('Medication Schedule',
-                style: GoogleFonts.fredoka(
-                    fontSize: 28,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.black)),
-            automaticallyImplyLeading: false,
-            pinned: true,
-            backgroundColor: Colors.white,
-          ),
-        ];
-      },
-          // Content
-          body: Builder(builder: (BuildContext context) {
-        return CustomScrollView(slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 0),
-              child: TableCalendar(
-                firstDay: _firstDay,
-                lastDay: _lastDay,
-                focusedDay: _focusedDay,
-                calendarFormat: _calendarFormat,
-                selectedDayPredicate: (day) {
-                  return isSameDay(_selectedDay, day);
-                },
-                onDaySelected: (selectedDay, focusedDay) {
-                  if (!isSameDay(_selectedDay, selectedDay)) {
-                    setState(() {
-                      _selectedDay = selectedDay;
-                      _focusedDay = focusedDay;
-                    });
-                  }
-                },
-                onFormatChanged: (format) {
-                  if (_calendarFormat != format) {
-                    setState(() {
-                      _calendarFormat = format;
-                    });
-                  }
-                },
-                onPageChanged: (focusedDay) {
+      appBar: AppBar(
+        title: Text('Medication Schedule',
+            style: GoogleFonts.fredoka(
+                fontSize: 28,
+                fontWeight: FontWeight.normal,
+                color: Colors.black)),
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: Column(
+        children: [
+          TableCalendar(
+            firstDay: _firstDay,
+            lastDay: _lastDay,
+            focusedDay: _focusedDay,
+            calendarFormat: _calendarFormat,
+            selectedDayPredicate: (day) {
+              return isSameDay(_selectedDay, day);
+            },
+            onDaySelected: (selectedDay, focusedDay) {
+              if (!isSameDay(_selectedDay, selectedDay)) {
+                setState(() {
+                  _selectedDay = selectedDay;
                   _focusedDay = focusedDay;
-                },
+                });
+                _fetchSchedule(selectedDay);
+              }
+            },
+            onFormatChanged: (format) {
+              if (_calendarFormat != format) {
+                setState(() {
+                  _calendarFormat = format;
+                });
+              }
+            },
+            onPageChanged: (focusedDay) {
+              _focusedDay = focusedDay;
+            },
+            calendarStyle: CalendarStyle(
+              selectedDecoration: const BoxDecoration(
+                color: Color(0xFF809BCE),
+                shape: BoxShape.circle,
+              ),
+              todayDecoration: BoxDecoration(
+                color: const Color(0xFF809BCE).withOpacity(0.5),
+                shape: BoxShape.circle,
               ),
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 0),
-            sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                List answers = _MedicationQuery(_focusedDay);
-                // print('MedQuery' + _MedicationQuery(_focusedDay));
-                return (answers.isEmpty)
-                    ? Container()
-                    : displayWidget(
-                        input1: questions[index], input2: answers[index]);
-              },
-              childCount: questions.length,
-            )),
+          const SizedBox(height: 10),
+          Expanded(
+            child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _scheduleItems.isEmpty
+                ? Center(
+                    child: Text(
+                      "No medications scheduled for this day.",
+                      style: GoogleFonts.signikaNegative(fontSize: 18, color: Colors.grey),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _scheduleItems.length,
+                    itemBuilder: (context, index) {
+                      return _buildScheduleCard(_scheduleItems[index]);
+                    },
+                  ),
           ),
-        ]);
-      })),
+        ],
+      ),
     );
   }
 
-  //Display Values
-  Widget displayWidget({required String input1, required input2}) {
-    return Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 5),
-            child: IntrinsicHeight(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Meals
-                  Expanded(
-                    flex: 1,
-                    child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0, 0, 10, 0),
-                      child: Container(
-                          constraints: const BoxConstraints(minHeight: 68),
-                          decoration: BoxDecoration(
-                            color: input1.contains('Breakfast')
-                                ? const Color(0xFFFFCB77)
-                                : input1.contains('Lunch')
-                                    ? const Color(0xFF00B4D8)
-                                    : const Color(0xFF023E8A),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                5, 5, 5, 5),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    input1,
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.signikaNegative(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: input1.contains('Breakfast') ||
-                                              input1.contains('Lunch')
-                                          ? Colors.black
-                                          : Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )),
-                    ),
-                  ),
+  Widget _buildScheduleCard(MedicationScheduleItem item) {
+    Color statusColor;
+    switch(item.status) {
+      case 'Taken': statusColor = Colors.green; break;
+      case 'Skipped': statusColor = Colors.red; break;
+      case 'Snoozed': statusColor = Colors.orange; break;
+      default: statusColor = Colors.grey;
+    }
 
-                  // Meds
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                        constraints: const BoxConstraints(minHeight: 68),
-                        decoration: BoxDecoration(
-                          color: input1.contains('Breakfast')
-                              ? const Color(0xFFFFCB77)
-                              : input1.contains('Lunch')
-                                  ? const Color(0xFF00B4D8)
-                                  : const Color(0xFF023E8A),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding:
-                              const EdgeInsetsDirectional.fromSTEB(5, 5, 5, 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                multipleString(input2),
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.signikaNegative(
-                                  height: 1.5,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                  color: input1.contains('Breakfast') ||
-                                          input1.contains('Lunch')
-                                      ? Colors.black
-                                      : Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            // Time Section
+            Container(
+              padding: const EdgeInsets.all(16),
+              width: 100,
+              decoration: BoxDecoration(
+                color: const Color(0xFF809BCE).withOpacity(0.1),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  bottomLeft: Radius.circular(12),
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  item.time,
+                  style: GoogleFonts.signikaNegative(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF809BCE),
                   ),
-                ],
+                ),
               ),
             ),
-          )
-        ]);
+            // Divider
+            Container(width: 1, color: Colors.grey.shade200),
+            // Content
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      item.medication.medName,
+                      style: GoogleFonts.signikaNegative(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${item.medication.dosage ?? ''} ${item.medication.dosageUnit ?? ''}',
+                      style: GoogleFonts.signikaNegative(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.circle, size: 10, color: statusColor),
+                        const SizedBox(width: 5),
+                        Text(
+                          item.status,
+                          style: GoogleFonts.signikaNegative(
+                            fontSize: 14,
+                            color: statusColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

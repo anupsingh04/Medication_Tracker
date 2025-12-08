@@ -33,7 +33,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   //TabBarList
   final List<Tuple3> _tab = [
     const Tuple3('Profile', ProfileTab(), Icon(Icons.person)),
-    const Tuple3('Settings', SettingsTab(), Icon(Icons.access_time_sharp)),
+    const Tuple3('Routine', SettingsTab(), Icon(Icons.schedule)),
   ];
 
   @override
@@ -73,11 +73,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
               pinned: false,
               backgroundColor: Colors.white,
               expandedHeight: 100.0,
-              // flexibleSpace: FlexibleSpaceBar(
-              //   title:
-              //   background: (//Image, stretchModes: [StretchMode.zoomBackground],)
-              // ),
-              // forceElevated: innerBoxIsScrolled,
             ),
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
