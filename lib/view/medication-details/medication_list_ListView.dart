@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'nearby_pharmacy.dart';
+import 'add_medication_1.dart';
 import '../../controller/medication_service.dart';
 import '../../model/medication.dart';
+import 'dart:io';
 
 class MedicationListView extends StatefulWidget {
   const MedicationListView({Key? key}) : super(key: key);
@@ -98,12 +100,19 @@ class _MedicationListViewState extends State<MedicationListView> {
                                 topLeft: Radius.circular(8),
                                 topRight: Radius.circular(0),
                               ),
-                              child: Image.asset(
-                                'assets/images/medicine.png', // Default image for now
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.cover,
-                              ),
+                              child: (med.imagePath != null && med.imagePath!.isNotEmpty)
+                                  ? Image.file(
+                                      File(med.imagePath!),
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.asset(
+                                      'assets/images/medicine.png',
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                    ),
                             ),
                             Expanded(
                               child: Column(
@@ -220,6 +229,15 @@ class _MedicationListViewState extends State<MedicationListView> {
                                             builder: (context) => const NearbyPharmacyWidget()));
                                     },
                                     child: const Text("Restock"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => AddMedication1(medication: med, editIndex: index)));
+                                    },
+                                    child: const Text("Edit"),
                                   ),
                                   TextButton(
                                     onPressed: () {

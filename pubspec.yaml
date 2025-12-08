@@ -17,6 +17,7 @@ dependencies:
   shared_preferences: ^2.2.2 # Confirmed dependency
   url_launcher: ^6.2.5
   path_provider: ^2.1.2 # Often needed, good to have
+  image_picker: ^1.0.7 # Added for photo functionality
 
   # UI & Widgets
   cupertino_icons: ^1.0.6

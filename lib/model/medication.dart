@@ -13,6 +13,7 @@ class Medication {
   String? dosage;
   String? dosageUnit;
   String? medicineIntakeNotif;
+  String? imagePath; // Added image path
 
   // Constructor
   Medication({
@@ -30,6 +31,7 @@ class Medication {
     this.dosage,
     this.dosageUnit,
     this.medicineIntakeNotif,
+    this.imagePath,
   });
 
   // Convert a Medication object into a Map
@@ -49,6 +51,7 @@ class Medication {
       'Dosage': dosage ?? '',
       'DosageUnit': dosageUnit ?? 'mg',
       'MedicineIntakeNotif': medicineIntakeNotif ?? '',
+      'ImagePath': imagePath ?? '',
     };
   }
 
@@ -69,6 +72,7 @@ class Medication {
       dosage: json['Dosage'],
       dosageUnit: json['DosageUnit'],
       medicineIntakeNotif: json['MedicineIntakeNotif'],
+      imagePath: json['ImagePath'],
     );
   }
 }

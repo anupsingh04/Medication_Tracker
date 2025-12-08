@@ -23,7 +23,6 @@ class MedicationService {
       List<Medication> loadedMeds = jsonList.map((json) => Medication.fromJson(json)).toList();
       medicationsNotifier.value = loadedMeds;
     } else {
-      // Initialize with empty list or default data if needed
       medicationsNotifier.value = [];
     }
   }
@@ -39,6 +38,22 @@ class MedicationService {
     // Persist
     String jsonString = jsonEncode(currentMeds.map((m) => m.toJson()).toList());
     await prefs.setString('medications', jsonString);
+  }
+
+  Future<void> updateMedication(int index, Medication med) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<Medication> currentMeds = List.from(medicationsNotifier.value);
+
+    if (index >= 0 && index < currentMeds.length) {
+      currentMeds[index] = med;
+
+      // Update State
+      medicationsNotifier.value = currentMeds;
+
+      // Persist
+      String jsonString = jsonEncode(currentMeds.map((m) => m.toJson()).toList());
+      await prefs.setString('medications', jsonString);
+    }
   }
 
   Future<void> deleteMedication(int index) async {
