@@ -24,6 +24,30 @@ class _MedicationListViewState extends State<MedicationListView> {
     MedicationService().loadMedications();
   }
 
+  Widget _buildImage(String? imagePath) {
+    if (imagePath == null || imagePath.isEmpty) {
+      return Image.asset('assets/images/medicine.png', width: 100, height: 100, fit: BoxFit.cover);
+    }
+    if (imagePath.startsWith('assets/')) {
+      return Image.asset(imagePath, width: 100, height: 100, fit: BoxFit.cover);
+    }
+    return Image.file(
+      File(imagePath),
+      width: 100,
+      height: 100,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Image.asset('assets/images/medicine.png', width: 100, height: 100, fit: BoxFit.cover);
+      },
+    );
+  }
+
+  Color _getStockColor(int stock) {
+    if (stock <= 5) return Colors.red;
+    if (stock <= 10) return Colors.orange;
+    return Colors.green;
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<List<Medication>>(
@@ -65,6 +89,9 @@ class _MedicationListViewState extends State<MedicationListView> {
           itemCount: medications.length,
           itemBuilder: (context, index) {
             Medication med = medications[index];
+            int stock = int.tryParse(med.dosageStock ?? '0') ?? 0;
+            double stockPercent = (stock > 50) ? 1.0 : (stock / 50.0); // Arbitrary max stock for visualization
+
             return Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 0),
               child: Container(
@@ -100,19 +127,7 @@ class _MedicationListViewState extends State<MedicationListView> {
                                 topLeft: Radius.circular(8),
                                 topRight: Radius.circular(0),
                               ),
-                              child: (med.imagePath != null && med.imagePath!.isNotEmpty)
-                                  ? Image.file(
-                                      File(med.imagePath!),
-                                      width: 100,
-                                      height: 100,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Image.asset(
-                                      'assets/images/medicine.png',
-                                      width: 100,
-                                      height: 100,
-                                      fit: BoxFit.cover,
-                                    ),
+                              child: _buildImage(med.imagePath),
                             ),
                             Expanded(
                               child: Column(
@@ -147,7 +162,7 @@ class _MedicationListViewState extends State<MedicationListView> {
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Text(
-                                          'Completion',
+                                          'Stock',
                                           style: GoogleFonts.signikaNegative(
                                             color: const Color(0xFF57636C),
                                             fontSize: 14,
@@ -157,11 +172,11 @@ class _MedicationListViewState extends State<MedicationListView> {
                                         Padding(
                                           padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 0, 0),
                                           child: LinearPercentIndicator(
-                                            percent: 0.5, // Placeholder
+                                            percent: stockPercent,
                                             width: 80,
                                             lineHeight: 8,
                                             animation: true,
-                                            progressColor: const Color(0xFF809BCE),
+                                            progressColor: _getStockColor(stock),
                                             backgroundColor: const Color(0xFFE0E3E7),
                                             barRadius: const Radius.circular(8),
                                             padding: EdgeInsets.zero,
@@ -170,7 +185,7 @@ class _MedicationListViewState extends State<MedicationListView> {
                                         Padding(
                                           padding: const EdgeInsetsDirectional.fromSTEB(8, 0, 0, 0),
                                           child: Text(
-                                            '50%', // Placeholder
+                                            stock.toString(),
                                             style: GoogleFonts.signikaNegative(
                                               color: const Color(0xFF14181B),
                                               fontSize: 14,
@@ -216,7 +231,8 @@ class _MedicationListViewState extends State<MedicationListView> {
                               Text('Type: ${med.medType}'),
                               Text('Provider: ${med.medProvider}'),
                               Text('Dosage: ${med.dosage} ${med.dosageUnit}'),
-                              Text('Frequency: ${med.frequencyPerDay}'),
+                              // Text('Frequency: ${med.frequencyPerDay}'), // Replaced by Intake Times
+                              Text('Times: ${med.intakeTimes.join(', ')}'),
                               const SizedBox(height: 12),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
