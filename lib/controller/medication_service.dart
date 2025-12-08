@@ -35,14 +35,59 @@ class MedicationService {
     final prefs = await SharedPreferences.getInstance();
     final String? medsString = prefs.getString('medications');
 
-    if (medsString != null) {
+    if (medsString != null && medsString.isNotEmpty) {
       List<dynamic> jsonList = jsonDecode(medsString);
       List<Medication> loadedMeds = jsonList.map((json) => Medication.fromJson(json)).toList();
       medicationsNotifier.value = loadedMeds;
     } else {
-      medicationsNotifier.value = [];
+      await _seedDemoData(prefs);
     }
     notifyUpdate();
+  }
+
+  Future<void> _seedDemoData(SharedPreferences prefs) async {
+    List<Medication> demos = [
+      Medication(
+        id: 'demo1',
+        medName: 'Vitamin C',
+        medNickName: 'Immunity Booster',
+        medType: 'Pills',
+        dosage: '500',
+        dosageUnit: 'mg',
+        dosageStock: '30',
+        imagePath: 'assets/images/pill1.png',
+        intakeTimes: ['08:00', '13:00'],
+        medProvider: 'Nature Made',
+      ),
+      Medication(
+        id: 'demo2',
+        medName: 'Paracetamol',
+        medNickName: 'Headache',
+        medType: 'Tablets',
+        dosage: '500',
+        dosageUnit: 'mg',
+        dosageStock: '12',
+        imagePath: 'assets/images/pill2.png',
+        intakeTimes: ['09:00', '21:00'],
+        medProvider: 'Panadol',
+      ),
+      Medication(
+        id: 'demo3',
+        medName: 'Amoxicillin',
+        medNickName: 'Antibiotics',
+        medType: 'Capsules',
+        dosage: '250',
+        dosageUnit: 'mg',
+        dosageStock: '4', // Low stock for alert demo
+        imagePath: 'assets/images/pill3.png',
+        intakeTimes: ['10:00', '18:00', '22:00'],
+        medProvider: 'Generic',
+      ),
+    ];
+
+    medicationsNotifier.value = demos;
+    String jsonString = jsonEncode(demos.map((m) => m.toJson()).toList());
+    await prefs.setString('medications', jsonString);
   }
 
   Future<void> addMedication(Medication med) async {
@@ -132,8 +177,6 @@ class MedicationService {
     if (items.isEmpty) return 0.0;
 
     int takenCount = items.where((i) => i.status == 'Taken').length;
-    // Skipped items generally count as completed interaction in some apps, but strictly progress usually means taken.
-    // Let's assume progress is (Taken) / (Total).
     return takenCount / items.length;
   }
 
@@ -143,10 +186,7 @@ class MedicationService {
     List<MedicationScheduleItem> schedule = [];
 
     for (var med in meds) {
-      // Basic frequency check (can be improved with start/end dates and specific days)
-      // For now, assume everyday or check frequencyPerWeek/Day logic if implemented properly.
-      // Currently frequency is stored as string like "Everyday", "Monday", etc.
-      // We will assume "Everyday" or valid for now since complex parsing wasn't requested/implemented fully yet.
+      // Assuming Everyday frequency for demo simplicity
 
       for (var timeStr in med.intakeTimes) {
         String status = log['${med.id}_$timeStr'] ?? 'Pending';
