@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'medication_list.dart';
 import 'add_medication_2.dart';
 import 'InputValidation.dart';
+import '../../model/medication.dart';
 
 class AddMedication1 extends StatefulWidget {
   const AddMedication1({Key? key}) : super(key: key);
@@ -13,10 +13,10 @@ class AddMedication1 extends StatefulWidget {
 
 class _AddMedication1State extends State<AddMedication1>
     with InputValidationMixin {
-  late TextEditingController formInputController1;
-  late TextEditingController formInputController2;
-  late TextEditingController formInputController3;
-  late TextEditingController formInputController4;
+  late TextEditingController formInputController1; // Name
+  late TextEditingController formInputController2; // Nickname
+  late TextEditingController formInputController3; // Provider
+  late TextEditingController formInputController4; // Contact
   String? dropDownValue1 = 'Pills';
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final formKey = GlobalKey<FormState>();
@@ -28,6 +28,15 @@ class _AddMedication1State extends State<AddMedication1>
     formInputController2 = TextEditingController();
     formInputController3 = TextEditingController();
     formInputController4 = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    formInputController1.dispose();
+    formInputController2.dispose();
+    formInputController3.dispose();
+    formInputController4.dispose();
+    super.dispose();
   }
 
   @override
@@ -148,6 +157,7 @@ class _AddMedication1State extends State<AddMedication1>
                                             padding: const EdgeInsetsDirectional
                                                 .fromSTEB(0, 5, 0, 0),
                                             child: TextFormField(
+                                                controller: formInputController1,
                                                 obscureText: false,
                                                 style:
                                                     GoogleFonts.signikaNegative(
@@ -189,10 +199,6 @@ class _AddMedication1State extends State<AddMedication1>
                                                           .fromSTEB(
                                                           20, 0, 20, 0),
                                                 ),
-                                                onSaved: (String? value) {
-                                                  //save
-                                                  print("saved");
-                                                },
                                                 validator: (String? value) {
                                                   if (value == null ||
                                                       value.isEmpty) {
@@ -233,6 +239,7 @@ class _AddMedication1State extends State<AddMedication1>
                                             padding: const EdgeInsetsDirectional
                                                 .fromSTEB(0, 5, 0, 0),
                                             child: TextFormField(
+                                              controller: formInputController2,
                                               obscureText: false,
                                               style:
                                                   GoogleFonts.signikaNegative(
@@ -268,10 +275,6 @@ class _AddMedication1State extends State<AddMedication1>
                                                     const EdgeInsetsDirectional
                                                         .fromSTEB(20, 0, 20, 0),
                                               ),
-                                              onSaved: (String? value) {
-                                                //save
-                                                print("saved");
-                                              },
                                             ),
                                           ),
                                         ),
@@ -345,7 +348,6 @@ class _AddMedication1State extends State<AddMedication1>
                                                       dropDownValue1 = val!;
                                                     });
                                                   },
-                                                  // height: 35,
                                                   style:
                                                       GoogleFonts
                                                           .signikaNegative(
@@ -357,13 +359,11 @@ class _AddMedication1State extends State<AddMedication1>
                                                       const Color(0xFFE7E0EC),
                                                   focusColor: Colors.red,
                                                   isExpanded: true,
-                                                  //margin: EdgeInsetsDirectional.fromSTEB(12,4,12,4),
                                                   elevation: 2,
                                                   underline: Container(
                                                     color:
                                                         const Color(0xFFE7E0EC),
                                                   )
-                                                  // hidesUnderline: true,
                                                   ),
                                             ),
                                           ),
@@ -512,6 +512,7 @@ class _AddMedication1State extends State<AddMedication1>
                                             padding: const EdgeInsetsDirectional
                                                 .fromSTEB(0, 5, 0, 0),
                                             child: TextFormField(
+                                                controller: formInputController3,
                                                 obscureText: false,
                                                 style:
                                                     GoogleFonts.signikaNegative(
@@ -553,10 +554,6 @@ class _AddMedication1State extends State<AddMedication1>
                                                           .fromSTEB(
                                                           20, 0, 20, 0),
                                                 ),
-                                                onSaved: (String? value) {
-                                                  //save
-                                                  print("saved");
-                                                },
                                                 validator: (String? value) {
                                                   if (value == null ||
                                                       value.isEmpty) {
@@ -597,6 +594,7 @@ class _AddMedication1State extends State<AddMedication1>
                                             padding: const EdgeInsetsDirectional
                                                 .fromSTEB(0, 5, 0, 0),
                                             child: TextFormField(
+                                                controller: formInputController4,
                                                 obscureText: false,
                                                 style:
                                                     GoogleFonts.signikaNegative(
@@ -638,10 +636,6 @@ class _AddMedication1State extends State<AddMedication1>
                                                           .fromSTEB(
                                                           20, 0, 20, 0),
                                                 ),
-                                                onSaved: (String? value) {
-                                                  //save
-                                                  print("saved");
-                                                },
                                                 validator: (String? value) {
                                                   if (value == null ||
                                                       value.isEmpty) {
@@ -688,11 +682,21 @@ class _AddMedication1State extends State<AddMedication1>
                                                       .validate()) {
                                                     formKey.currentState
                                                         ?.save();
+
+                                                    // Create partial Medication object
+                                                    Medication newMed = Medication(
+                                                      medName: formInputController1.text,
+                                                      medNickName: formInputController2.text,
+                                                      medType: dropDownValue1,
+                                                      medProvider: formInputController3.text,
+                                                      medProviderContact: formInputController4.text,
+                                                    );
+
                                                     Navigator.push(
                                                         context,
                                                         MaterialPageRoute(
                                                             builder: (context) =>
-                                                                const AddMedication2()));
+                                                                AddMedication2(medication: newMed)));
                                                   }
                                                 },
                                                 child: Row(

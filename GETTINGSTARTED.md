@@ -4,7 +4,7 @@ Welcome to Medimate! This guide will help you navigate the app and make the most
 
 ## Table of Contents
 1.  [Introduction](#introduction)
-2.  [Onboarding & Login](#onboarding--login)
+2.  [Getting Started](#getting-started)
 3.  [Home Dashboard](#home-dashboard)
 4.  [Searching for Medication](#searching-for-medication)
 5.  [Managing Your Medications](#managing-your-medications)
@@ -16,11 +16,8 @@ Welcome to Medimate! This guide will help you navigate the app and make the most
 ## Introduction
 Medimate is your personal health assistant. It helps you keep track of your medication schedule, find information about different pills, and monitor your adherence to your prescription plan.
 
-## Onboarding & Login
-When you first open the app, you will see the Landing Page.
-- **Login:** If you already have an account, tap "Login", enter your email and password, and tap "Login" again to access the app.
-- **Sign Up:** If you are new, tap "Sign Up" to create an account. You will be asked for your Name, Email, Password, and IC Number.
-- **Note:** For this version, you can tap "Login" or "Sign Up" with any valid-looking input to proceed to the main app.
+## Getting Started
+For ease of use, Medimate does not require a login. When you open the app, you will be taken directly to the Home Dashboard, ready to start managing your medications immediately.
 
 ## Home Dashboard
 The Home screen is your daily command center.
@@ -42,7 +39,7 @@ Go to the **Medication** tab (pill icon) to view your full list.
 - **View Details:** Tap on a medication card to see dosage, provider info, and your adherence stats.
 - **Add Medication:** Tap the **+ (Plus)** button to add a new prescription. You'll be guided through a few steps to enter the name, dosage, and schedule.
 - **History:** Tap the **History** button to view your past logs and journals.
-- **Delete:** Tap the **Bin** icon to remove a medication (use with caution!).
+- **Delete:** Tap the **Delete** button on a medication card to remove it.
 
 ## Viewing Your Schedule
 The **Schedule** tab (calendar icon) helps you plan your day.
