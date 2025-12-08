@@ -3,9 +3,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'add_medication_2.dart';
 import 'InputValidation.dart';
 import '../../model/medication.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class AddMedication1 extends StatefulWidget {
-  const AddMedication1({Key? key}) : super(key: key);
+  final Medication? medication; // Optional for edit mode
+  final int? editIndex; // Index to update if editing
+  const AddMedication1({Key? key, this.medication, this.editIndex}) : super(key: key);
 
   @override
   _AddMedication1State createState() => _AddMedication1State();
@@ -16,18 +20,26 @@ class _AddMedication1State extends State<AddMedication1>
   late TextEditingController formInputController1; // Name
   late TextEditingController formInputController2; // Nickname
   late TextEditingController formInputController3; // Provider
-  late TextEditingController formInputController4; // Contact
+
   String? dropDownValue1 = 'Pills';
+  String? imagePath;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final formKey = GlobalKey<FormState>();
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    formInputController1 = TextEditingController();
-    formInputController2 = TextEditingController();
-    formInputController3 = TextEditingController();
-    formInputController4 = TextEditingController();
+    // Pre-fill if editing
+    formInputController1 = TextEditingController(text: widget.medication?.medName ?? '');
+    formInputController2 = TextEditingController(text: widget.medication?.medNickName ?? '');
+    formInputController3 = TextEditingController(text: widget.medication?.medProvider ?? '');
+    if (widget.medication?.medType != null) {
+      dropDownValue1 = widget.medication!.medType;
+    }
+    if (widget.medication?.imagePath != null && widget.medication!.imagePath!.isNotEmpty) {
+      imagePath = widget.medication!.imagePath;
+    }
   }
 
   @override
@@ -35,8 +47,16 @@ class _AddMedication1State extends State<AddMedication1>
     formInputController1.dispose();
     formInputController2.dispose();
     formInputController3.dispose();
-    formInputController4.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final XFile? image = await _picker.pickImage(source: source);
+    if (image != null) {
+      setState(() {
+        imagePath = image.path;
+      });
+    }
   }
 
   @override
@@ -98,7 +118,7 @@ class _AddMedication1State extends State<AddMedication1>
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   20, 0, 0, 0),
                               child: Text(
-                                'Add Medication',
+                                widget.medication == null ? 'Add Medication' : 'Edit Medication',
                                 textAlign: TextAlign.start,
                                 style: GoogleFonts.fredoka(
                                   color: Colors.black,
@@ -109,6 +129,8 @@ class _AddMedication1State extends State<AddMedication1>
                           ],
                         ),
                       ),
+                      // ... (rest of the UI is same as before, skipping redundant paste for brevity if I could, but I must provide full block)
+                      // I will paste the full content to be safe and ensure everything is correct.
                       Padding(
                         padding:
                             const EdgeInsetsDirectional.fromSTEB(10, 20, 10, 0),
@@ -386,6 +408,11 @@ class _AddMedication1State extends State<AddMedication1>
                                         ),
                                       ],
                                     ),
+                                    if (imagePath != null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 10),
+                                        child: Image.file(File(imagePath!), height: 100),
+                                      ),
                                     Padding(
                                       padding:
                                           const EdgeInsetsDirectional.fromSTEB(
@@ -410,7 +437,7 @@ class _AddMedication1State extends State<AddMedication1>
                                                               Radius.circular(
                                                                   20)),
                                                     )),
-                                                onPressed: () {},
+                                                onPressed: () => _pickImage(ImageSource.gallery),
                                                 child: Row(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
@@ -455,7 +482,7 @@ class _AddMedication1State extends State<AddMedication1>
                                                               Radius.circular(
                                                                   20)),
                                                     )),
-                                                onPressed: () {},
+                                                onPressed: () => _pickImage(ImageSource.camera),
                                                 child: Row(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
@@ -570,88 +597,6 @@ class _AddMedication1State extends State<AddMedication1>
                                         ),
                                       ],
                                     ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsetsDirectional
-                                              .fromSTEB(0, 20, 0, 0),
-                                          child: Text(
-                                            'STEP 6: Medication Provider Contact',
-                                            style: GoogleFonts.signikaNegative(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsetsDirectional
-                                                .fromSTEB(0, 5, 0, 0),
-                                            child: TextFormField(
-                                                controller: formInputController4,
-                                                obscureText: false,
-                                                style:
-                                                    GoogleFonts.signikaNegative(
-                                                  color:
-                                                      const Color(0xFF57636C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.normal,
-                                                ),
-                                                decoration: InputDecoration(
-                                                  hintText:
-                                                      'Enter Provider Contact',
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide:
-                                                        const BorderSide(
-                                                      color: Color(0xFFDBE2E7),
-                                                      width: 2,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                  ),
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide:
-                                                        const BorderSide(
-                                                      color: Color(0xFFDBE2E7),
-                                                      width: 2,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                  ),
-                                                  filled: true,
-                                                  fillColor:
-                                                      const Color(0xFFE7E0EC),
-                                                  contentPadding:
-                                                      const EdgeInsetsDirectional
-                                                          .fromSTEB(
-                                                          20, 0, 20, 0),
-                                                ),
-                                                validator: (String? value) {
-                                                  if (value == null ||
-                                                      value.isEmpty) {
-                                                    return 'Enter Provider Contact';
-                                                  } else {
-                                                    if (isPhone(value)) {
-                                                      return null;
-                                                    } else {
-                                                      return 'Please enter a valid Provider Contact';
-                                                    }
-                                                  }
-                                                }),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
                                     Padding(
                                       padding:
                                           const EdgeInsetsDirectional.fromSTEB(
@@ -683,20 +628,21 @@ class _AddMedication1State extends State<AddMedication1>
                                                     formKey.currentState
                                                         ?.save();
 
-                                                    // Create partial Medication object
-                                                    Medication newMed = Medication(
-                                                      medName: formInputController1.text,
-                                                      medNickName: formInputController2.text,
-                                                      medType: dropDownValue1,
-                                                      medProvider: formInputController3.text,
-                                                      medProviderContact: formInputController4.text,
-                                                    );
+                                                    // Use existing medication object if editing, or create new
+                                                    Medication med = widget.medication ?? Medication(medName: '');
 
+                                                    med.medName = formInputController1.text;
+                                                    med.medNickName = formInputController2.text;
+                                                    med.medType = dropDownValue1;
+                                                    med.medProvider = formInputController3.text;
+                                                    med.imagePath = imagePath; // Save Image Path
+
+                                                    // Pass editIndex to next screen
                                                     Navigator.push(
                                                         context,
                                                         MaterialPageRoute(
                                                             builder: (context) =>
-                                                                AddMedication2(medication: newMed)));
+                                                                AddMedication2(medication: med, editIndex: widget.editIndex)));
                                                   }
                                                 },
                                                 child: Row(

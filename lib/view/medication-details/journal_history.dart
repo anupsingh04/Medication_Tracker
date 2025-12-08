@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'medication_list.dart';
 
 class JournalHistoryWidget extends StatefulWidget {
   const JournalHistoryWidget({Key? key}) : super(key: key);
@@ -10,632 +9,165 @@ class JournalHistoryWidget extends StatefulWidget {
 }
 
 class _JournalHistoryWidgetState extends State<JournalHistoryWidget> {
-  // String dropDownValue;
-  DateTime startDate = DateTime.now();
-  final scaffoldKey = GlobalKey<ScaffoldState>();
-
-  // Selecting date method
-  _selectDate(BuildContext context1) async {
-    final DateTime? startPicked = await showDatePicker(
-      context: context1,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2022),
-      lastDate: DateTime(2050),
-    );
-    if (startPicked != null && startPicked != startDate) {
-      setState(() {
-        startDate = startPicked;
-      });
-    }
-  }
+  DateTime selectedDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: scaffoldKey,
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: GestureDetector(
-          onTap: () => FocusScope.of(context).unfocus(),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(10, 10, 10, 10),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(10, 10, 10, 10),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF809BCE),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: IconButton(
-                            iconSize: 60,
-                            color: const Color(0x00FCFCFC),
-                            icon: const Icon(
-                              Icons.arrow_back_ios_rounded,
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(10, 10, 10, 0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding:
-                              const EdgeInsetsDirectional.fromSTEB(10, 0, 0, 0),
-                          child: Text(
-                            'History',
-                            style: GoogleFonts.fredoka(
-                              color: Colors.black,
-                              fontSize: 28,
-                              fontWeight: FontWeight.normal,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 155,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(
-                              color: const Color(0xFF809BCE),
-                              width: 3,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              const Padding(
-                                padding:
-                                    EdgeInsetsDirectional.fromSTEB(18, 0, 0, 0),
-                                child: Icon(
-                                  Icons.calendar_today,
-                                  color: Colors.black,
-                                  size: 25,
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: () => _selectDate(context),
-                                child: Text(
-                                  "$startDate".split(' ')[0],
-                                  style: GoogleFonts.signikaNegative(
-                                    color: Colors.black,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  elevation: 0,
-                                ),
-                              ),
-                              // widget.dropdownDatePicker,
-                              // ElevatedButton(
-                              //   onPressed: () => setState(
-                              //         () => (debugPrint('Rebuild UI.')),
-                              //   ),
-                              //   child: const Text('Print current date.'),
-                              // ),
-                              // FlutterFlowDropDown(
-                              //   options: ['Option 1'].toList(),
-                              //   onChanged: (val) =>
-                              //       setState(() => dropDownValue = val),
-                              //   width: 140,
-                              //   height: 50,
-                              //   textStyle: GoogleFonts.signikaNegative(
-                              //     color: Colors.black,
-                              //     fontSize: 18,
-                              //     fontWeight: FontWeight.normal,
-                              //   ),
-                              //   hintText: '11/3/2022',
-                              //   fillColor: Colors.white,
-                              //   elevation: 2,
-                              //   borderColor: Colors.transparent,
-                              //   borderWidth: 0,
-                              //   borderRadius: 0,
-                              //   margin:
-                              //   const EdgeInsetsDirectional.fromSTEB(12, 4, 12, 4),
-                              //   hidesUnderline: true,
-                              // ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(10, 20, 10, 0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding:
-                              const EdgeInsetsDirectional.fromSTEB(0, 10, 0, 0),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.64,
-                            height: 2,
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                        ),
-                        Text(
-                          'Medication',
-                          style: GoogleFonts.signikaNegative(
-                            color: Colors.black,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            10, 10, 10, 10),
-                        child: Material(
-                          color: Colors.transparent,
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.89,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  15, 10, 15, 10),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Coughing Medicine',
-                                        style: GoogleFonts.signikaNegative(
-                                          color: Colors.black,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsetsDirectional
-                                            .fromSTEB(0, 5, 0, 0),
-                                        child: Text(
-                                          'Benzonatate',
-                                          style: GoogleFonts.signikaNegative(
-                                            color: Colors.black,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsetsDirectional
-                                            .fromSTEB(0, 6, 0, 0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            Container(
-                                              width: 125,
-                                              height: 25,
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFF95B8D1),
-                                                borderRadius:
-                                                    BorderRadius.circular(16),
-                                              ),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsetsDirectional
-                                                        .fromSTEB(5, 5, 5, 5),
-                                                child: Text(
-                                                  'Before Breakfast',
-                                                  textAlign: TextAlign.center,
-                                                  style: GoogleFonts
-                                                      .signikaNegative(
-                                                    color: Colors.white,
-                                                    fontSize: 12,
-                                                    fontWeight:
-                                                        FontWeight.normal,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(5, 0, 0, 0),
-                                              child: Container(
-                                                width: 70,
-                                                height: 25,
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      const Color(0xFF95B8D1),
-                                                  borderRadius:
-                                                      BorderRadius.circular(16),
-                                                ),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsetsDirectional
-                                                          .fromSTEB(5, 5, 5, 5),
-                                                  child: Text(
-                                                    '8:00 AM',
-                                                    textAlign: TextAlign.center,
-                                                    style: GoogleFonts
-                                                        .signikaNegative(
-                                                      color: Colors.white,
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.normal,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Material(
-                                    color: Colors.transparent,
-                                    elevation: 5,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Container(
-                                      width: 70,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF809BCE),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsetsDirectional
-                                            .fromSTEB(0, 11, 0, 0),
-                                        child: Text(
-                                          'Taken',
-                                          textAlign: TextAlign.center,
-                                          style: GoogleFonts.signikaNegative(
-                                            color: const Color(0xFFD1EBDE),
-                                            fontWeight: FontWeight.normal,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            10, 10, 10, 10),
-                        child: Material(
-                          color: Colors.transparent,
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.89,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  15, 10, 15, 10),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Panadol',
-                                        style: GoogleFonts.signikaNegative(
-                                          color: Colors.black,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsetsDirectional
-                                            .fromSTEB(0, 5, 0, 0),
-                                        child: Text(
-                                          '-',
-                                          style: GoogleFonts.signikaNegative(
-                                            color: Colors.black,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsetsDirectional
-                                            .fromSTEB(0, 6, 0, 0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            Container(
-                                              width: 125,
-                                              height: 25,
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFF95B8D1),
-                                                borderRadius:
-                                                    BorderRadius.circular(16),
-                                              ),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsetsDirectional
-                                                        .fromSTEB(5, 5, 5, 5),
-                                                child: Text(
-                                                  'After Breakfast',
-                                                  textAlign: TextAlign.center,
-                                                  style: GoogleFonts
-                                                      .signikaNegative(
-                                                    color: Colors.white,
-                                                    fontSize: 12,
-                                                    fontWeight:
-                                                        FontWeight.normal,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(5, 0, 0, 0),
-                                              child: Container(
-                                                width: 75,
-                                                height: 25,
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      const Color(0xFF95B8D1),
-                                                  borderRadius:
-                                                      BorderRadius.circular(16),
-                                                ),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsetsDirectional
-                                                          .fromSTEB(5, 5, 5, 5),
-                                                  child: Text(
-                                                    '10:30 AM',
-                                                    textAlign: TextAlign.center,
-                                                    style: GoogleFonts
-                                                        .signikaNegative(
-                                                      color: Colors.white,
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.normal,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Material(
-                                    color: Colors.transparent,
-                                    elevation: 5,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Container(
-                                      width: 70,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF809BCE),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsetsDirectional
-                                            .fromSTEB(0, 11, 0, 0),
-                                        child: Text(
-                                          'Skipped',
-                                          textAlign: TextAlign.center,
-                                          style: GoogleFonts.signikaNegative(
-                                            color: const Color(0xFFEAC4D5),
-                                            fontWeight: FontWeight.normal,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(10, 15, 10, 0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding:
-                              const EdgeInsetsDirectional.fromSTEB(0, 10, 0, 0),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.71,
-                            height: 2,
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                        ),
-                        Text(
-                          'Journal',
-                          style: GoogleFonts.signikaNegative(
-                            color: Colors.black,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(0, 10, 0, 0),
-                    child: Material(
-                      color: Colors.transparent,
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.9,
-                        height: MediaQuery.of(context).size.height * 0.3,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            width: 1,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              10, 10, 10, 10),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Text(
-                                    'Symptoms: ',
-                                    style: GoogleFonts.signikaNegative(
-                                      color: Colors.black,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0, 5, 0, 0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Text(
-                                      'Fever, Sore Throat, Flu',
-                                      style: GoogleFonts.signikaNegative(
-                                        color: const Color(0x99000000),
-                                        fontWeight: FontWeight.normal,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0, 20, 0, 0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Text(
-                                      'Note: ',
-                                      style: GoogleFonts.signikaNegative(
-                                        color: Colors.black,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0, 5, 0, 0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Text(
-                                      'Lorem ipsum dolor sit amet, consectetur adipiscing.',
-                                      style: GoogleFonts.signikaNegative(
-                                        color: const Color(0x99000000),
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.normal,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+      appBar: AppBar(
+        title: Text(
+          'History',
+          style: GoogleFonts.fredoka(color: Colors.black, fontSize: 28),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Sample Timeline UI
+            _buildTimelineItem(
+              time: "08:00 AM",
+              medName: "Benzonatate",
+              status: "Taken",
+              statusColor: const Color(0xFFD1EBDE),
+              textColor: const Color(0xFF2E7D32),
+            ),
+            _buildTimelineItem(
+              time: "10:30 AM",
+              medName: "Panadol",
+              status: "Skipped",
+              statusColor: const Color(0xFFEAC4D5),
+              textColor: const Color(0xFFC62828),
+            ),
+            _buildTimelineItem(
+              time: "01:00 PM",
+              medName: "Vitamin C",
+              status: "Taken",
+              statusColor: const Color(0xFFD1EBDE),
+              textColor: const Color(0xFF2E7D32),
+            ),
+            _buildTimelineItem(
+              time: "08:00 PM",
+              medName: "Antibiotics",
+              status: "Pending",
+              statusColor: const Color(0xFFFFF3E0),
+              textColor: const Color(0xFFEF6C00),
+              isLast: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimelineItem({
+    required String time,
+    required String medName,
+    required String status,
+    required Color statusColor,
+    required Color textColor,
+    bool isLast = false,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Time Column
+        SizedBox(
+          width: 80,
+          child: Text(
+            time,
+            style: GoogleFonts.signikaNegative(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black54,
             ),
           ),
         ),
-      ),
+        // Line & Dot
+        Column(
+          children: [
+            Container(
+              width: 16,
+              height: 16,
+              decoration: BoxDecoration(
+                color: statusColor,
+                shape: BoxShape.circle,
+                border: Border.all(color: textColor, width: 2),
+              ),
+            ),
+            if (!isLast)
+              Container(
+                width: 2,
+                height: 80, // Adjust height based on content
+                color: Colors.grey.shade300,
+              ),
+          ],
+        ),
+        const SizedBox(width: 16),
+        // Content
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 20),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      medName,
+                      style: GoogleFonts.signikaNegative(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      status,
+                      style: GoogleFonts.signikaNegative(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                    ),
+                  ],
+                ),
+                Icon(
+                  status == "Taken"
+                      ? Icons.check_circle_outline
+                      : status == "Skipped"
+                          ? Icons.cancel_outlined
+                          : Icons.access_time,
+                  color: textColor,
+                  size: 28,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

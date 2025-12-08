@@ -7,7 +7,8 @@ import '../../model/medication.dart';
 
 class AddMedication2 extends StatefulWidget {
   final Medication medication;
-  const AddMedication2({Key? key, required this.medication}) : super(key: key);
+  final int? editIndex;
+  const AddMedication2({Key? key, required this.medication, this.editIndex}) : super(key: key);
 
   @override
   _AddMedication2State createState() => _AddMedication2State();
@@ -23,8 +24,8 @@ class _AddMedication2State extends State<AddMedication2>
   @override
   void initState() {
     super.initState();
-    formInputController1 = TextEditingController();
-    formInputController2 = TextEditingController();
+    formInputController1 = TextEditingController(text: widget.medication.dosageStock ?? '');
+    formInputController2 = TextEditingController(text: widget.medication.lowSupplyNotif ?? '');
   }
 
   @override
@@ -317,7 +318,7 @@ class _AddMedication2State extends State<AddMedication2>
                                                   context,
                                                   MaterialPageRoute(
                                                       builder: (context) =>
-                                                          AddMedication3(medication: widget.medication)));
+                                                          AddMedication3(medication: widget.medication, editIndex: widget.editIndex)));
                                             }
                                           },
                                           child: Row(

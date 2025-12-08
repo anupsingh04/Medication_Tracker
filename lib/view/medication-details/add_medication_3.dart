@@ -8,7 +8,8 @@ import '../../controller/medication_service.dart';
 
 class AddMedication3 extends StatefulWidget {
   final Medication medication;
-  const AddMedication3({Key? key, required this.medication}) : super(key: key);
+  final int? editIndex;
+  const AddMedication3({Key? key, required this.medication, this.editIndex}) : super(key: key);
 
   @override
   _AddMedication3State createState() => _AddMedication3State();
@@ -30,7 +31,35 @@ class _AddMedication3State extends State<AddMedication3>
   @override
   void initState() {
     super.initState();
-    formInputController = TextEditingController();
+    formInputController = TextEditingController(text: widget.medication.dosage ?? '');
+
+    // Attempt to pre-fill dropdowns and dates if data exists
+    if (widget.medication.frequencyPerWeek != null && widget.medication.frequencyPerWeek!.isNotEmpty) {
+      dropDownValue1 = widget.medication.frequencyPerWeek;
+    }
+    if (widget.medication.frequencyPerDay != null && widget.medication.frequencyPerDay!.isNotEmpty) {
+      dropDownValue2 = widget.medication.frequencyPerDay;
+    }
+    if (widget.medication.dosageUnit != null && widget.medication.dosageUnit!.isNotEmpty) {
+      dropDownValue3 = widget.medication.dosageUnit;
+    }
+    if (widget.medication.medicineIntakeNotif != null && widget.medication.medicineIntakeNotif!.isNotEmpty) {
+      dropDownValue4 = widget.medication.medicineIntakeNotif;
+    }
+    if (widget.medication.startDate != null && widget.medication.startDate!.isNotEmpty) {
+      try {
+        startDate = DateTime.parse(widget.medication.startDate!);
+      } catch (e) {
+        // Fallback or ignore parse error
+      }
+    }
+    if (widget.medication.endDate != null && widget.medication.endDate!.isNotEmpty) {
+      try {
+        endDate = DateTime.parse(widget.medication.endDate!);
+      } catch (e) {
+        // Fallback or ignore parse error
+      }
+    }
   }
 
   @override
@@ -43,14 +72,12 @@ class _AddMedication3State extends State<AddMedication3>
   _selectStartDate(BuildContext context1) async {
     final DateTime? startPicked = await showDatePicker(
       context: context1,
-      initialDate: DateTime.now(),
+      initialDate: startDate,
       firstDate: DateTime(2022),
       lastDate: DateTime(2050),
     );
     if (startPicked != null &&
-        startPicked != startDate &&
-        (startPicked.isAtSameMomentAs(DateTime.now()) ||
-            startPicked.isAfter(DateTime.now()))) {
+        startPicked != startDate) {
       setState(() {
         startDate = startPicked;
       });
@@ -61,14 +88,12 @@ class _AddMedication3State extends State<AddMedication3>
   _selectEndDate(BuildContext context2) async {
     final DateTime? endPicked = await showDatePicker(
       context: context2,
-      initialDate: DateTime.now(),
+      initialDate: endDate,
       firstDate: DateTime(2022),
       lastDate: DateTime(2050),
     );
     if (endPicked != null &&
-        endPicked != endDate &&
-        (endPicked.isAtSameMomentAs(startDate) ||
-            endPicked.isAfter(startDate))) {
+        endPicked != endDate) {
       setState(() {
         endDate = endPicked;
       });
@@ -863,7 +888,15 @@ class _AddMedication3State extends State<AddMedication3>
                                               widget.medication.medicineIntakeNotif = dropDownValue4;
 
                                               // Save to local storage
-                                              await MedicationService().addMedication(widget.medication);
+                                              if (widget.medication.medName.isNotEmpty) {
+                                                if (widget.editIndex != null) {
+                                                  // Update existing
+                                                  await MedicationService().updateMedication(widget.editIndex!, widget.medication);
+                                                } else {
+                                                  // Add new
+                                                  await MedicationService().addMedication(widget.medication);
+                                                }
+                                              }
 
                                               // Return to main screen
                                               Navigator.popUntil(context, (route) => route.isFirst);
