@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-// import 'package:country_pickers/country_pickers.dart';
 import 'package:intl/intl.dart';
 import 'InputValidation.dart';
 import 'Profile.dart';
@@ -12,9 +11,6 @@ import 'SubmitButton.dart';
 Map<String, String> input = {
   'Full Name' : 'John Doe',
   'Email' : 'example@gmail.com',
-  'Password' : 'QW12p_asq',
-  'IC Number' : '100291-20-2345',
-  'Phone Number' : '+6012-2345876',
   'Date of Birth' : '01/12/1984',
   'Gender' : 'Male',
   'Drug Allergies' : 'Penicillin'
@@ -32,13 +28,6 @@ class ProfileTab extends StatefulWidget {
 }
 
 class _ProfileTabState extends State<ProfileTab> with InputValidationMixin { 
-  //Password Hide/Show
-  bool _hide = false;
-  void _togglevisibility() {
-    setState(() {
-      _hide = !_hide;
-    });
-  }
 
   //Form Input
   final profileformKey = GlobalKey < FormState > ();
@@ -72,7 +61,7 @@ class _ProfileTabState extends State<ProfileTab> with InputValidationMixin {
                 padding: const EdgeInsetsDirectional.fromSTEB(16, 10, 16, 0),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate ((BuildContext context, int index){
-                    return cardWidget(input1: questions[index], input2: answers[index], editable: value);
+                    return cardWidget(input1: questions[index], input2: answers[index], index: index, editable: value);
                   },
                   childCount: questions.length,
                 ))
@@ -89,78 +78,8 @@ class _ProfileTabState extends State<ProfileTab> with InputValidationMixin {
     });
   }
   
-  // //Submit Button
-  // Widget subButton() {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.center,
-  //     crossAxisAlignment: CrossAxisAlignment.center,
-  //     children: [
-  //       ElevatedButton (
-  //         onPressed: () {
-  //           if (formGlobalKey.currentState!.validate()) {
-  //             formGlobalKey.currentState?.save();
-  //             ScaffoldMessenger.of(context).showSnackBar(
-  //               const SnackBar(content: Text('Saving...')),
-  //             );  
-  //             setState(() {isEditable.value = false;});
-  //           }
-  //         },
-  //         style: ButtonStyle(
-  //           elevation: MaterialStateProperty.all(0),
-  //           backgroundColor: MaterialStateProperty.all(Colors.transparent),
-  //         ),
-  //         child: Container(
-  //           width: MediaQuery.of(context).size.width * 0.8,
-  //           height: 40,
-  //           decoration: BoxDecoration(
-  //             color: const Color(0xFF809BCE),
-  //             borderRadius: BorderRadius.circular(10),
-  //           ),
-  //           child: Row(
-  //             mainAxisSize: MainAxisSize.max,
-  //             children: [
-  //               Expanded(
-  //                 child: Stack(
-  //                   children: [
-  //                     Row(
-  //                       mainAxisSize: MainAxisSize.max,
-  //                       children: [
-  //                         Expanded(
-  //                           child: Text(
-  //                             'SAVE CHANGES',
-  //                             textAlign: TextAlign.center,
-  //                             style: GoogleFonts.signikaNegative(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white)
-  //                           ),
-  //                         ),
-  //                       ],
-  //                     ),
-  //                     Padding(
-  //                       padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 10, 0),
-  //                       child: Row(
-  //                         mainAxisSize: MainAxisSize.max,
-  //                         mainAxisAlignment: MainAxisAlignment.end,
-  //                         children: const [
-  //                           Icon(
-  //                             Icons.check_rounded,
-  //                             color: Colors.white,
-  //                             size: 24,
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         )
-  //       )
-  //     ]
-  //   );
-  // }
-
   //Display Values
-  Widget cardWidget({required String input1, required input2, required editable}) {  
+  Widget cardWidget({required String input1, required input2, required int index, required editable}) {
     return Column(
       mainAxisSize: MainAxisSize.max,
       children: [
@@ -176,22 +95,12 @@ class _ProfileTabState extends State<ProfileTab> with InputValidationMixin {
                 style: GoogleFonts.signikaNegative(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.black),
                 ),
               ),
-              // if (input1 == questions[2])...[ // Information Button
-              // IconButton(
-              //   padding: EdgeInsets.zero,
-              //   constraints: const BoxConstraints(),
-              //   icon: const Icon(
-              //     Icons.info_rounded,
-              //     ),
-              //   onPressed: (){},
-              //   tooltip: 'Password should contain: \n - At least one upper case character \n - At least one lower case character \n - At least one digit \n - At least one special character \n - At least 8 characters in length',
-              // )]
             ],
           ),
         ),
 
         //'Full Name'
-        if (input1 == questions[0]) ...[
+        if (input1 == 'Full Name') ...[
         Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
           child: Stack(
@@ -217,7 +126,7 @@ class _ProfileTabState extends State<ProfileTab> with InputValidationMixin {
                   focusNode: FocusNode(),
                   enableInteractiveSelection: editable,
                   keyboardType: TextInputType.text,
-                  controller: myController[0],
+                  controller: myController[index],
                   style: GoogleFonts.signikaNegative(fontSize: 18,color: Colors.black),
                   decoration: InputDecoration(
                     border: InputBorder.none,
@@ -245,7 +154,7 @@ class _ProfileTabState extends State<ProfileTab> with InputValidationMixin {
         ]
 
         //'Email'
-        else if (input1 == questions[1]) ...[
+        else if (input1 == 'Email') ...[
         Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
           child: Stack(
@@ -271,7 +180,7 @@ class _ProfileTabState extends State<ProfileTab> with InputValidationMixin {
                   focusNode: FocusNode(),
                   enableInteractiveSelection: editable,
                   keyboardType: TextInputType.text,
-                  controller: myController[1],
+                  controller: myController[index],
                   style: GoogleFonts.signikaNegative(fontSize: 18,color: Colors.black),
                   decoration: InputDecoration(
                     border: InputBorder.none,
@@ -298,189 +207,8 @@ class _ProfileTabState extends State<ProfileTab> with InputValidationMixin {
           ]))
         ]
 
-        // 'Password'
-        else if (input1 == questions[2]) ...[
-        Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
-          child: Stack(
-            children:[ 
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height: 49,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(2),
-              border: Border.all(
-                color: Colors.black,
-              ),
-            )),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Flexible(
-                    flex: 7,
-                    child: TextFormField(
-                    enabled: editable,
-                    focusNode: FocusNode(),
-                    enableInteractiveSelection: editable,
-                    obscureText: !_hide,
-                    controller: myController[2],
-                    style: GoogleFonts.signikaNegative(fontSize: 18,color: Colors.black),
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'Please enter your ${input1.toLowerCase()}',
-                    ),
-                    onSaved: (String? value) {
-                      //save
-                      print("saved");
-                    },
-                    validator: (String? value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your ${input1.toLowerCase()}';
-                      } else {
-                        if (isPassword(value)) {
-                          return null;
-                        } else {
-                          return 'Please enter a valid ${input1.toLowerCase()}';
-                        }
-                      }
-                    }
-                )),
-                Flexible(
-                  flex: 1,
-                  child: IconButton(
-                    icon: Icon (
-                      _hide 
-                      ? Icons.visibility_off
-                      : Icons.visibility
-                    ),
-                    onPressed: () {
-                      _togglevisibility();
-                    }
-                  )),
-                ],
-              )),
-            ]))
-          ]
-
-        //'IC Number'
-        else if (input1 == questions[3]) ...[
-        Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
-          child: Stack(
-            children:[ 
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height: 49,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(2),
-              border: Border.all(
-                color: Colors.black,
-              ),
-            )
-          ),
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Flexible(
-                child: TextFormField(
-                  enabled: editable,
-                  focusNode: FocusNode(),
-                  enableInteractiveSelection: editable,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r"[0-9\+-]")),
-                  ],
-                  controller: myController[3],
-                  style: GoogleFonts.signikaNegative(fontSize: 18,color: Colors.black),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Please enter your ${input1.toLowerCase()}',
-                  ),
-                  onSaved: (String? value) {
-                    //save
-                    print("saved");
-                  },
-                  validator: (String? value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your ${input1.toLowerCase()}';
-                    } else {
-                      if (isIC(value)) {
-                        return null;
-                      } else {
-                        return 'Please enter a valid ${input1.toLowerCase()}';
-                      }
-                    }
-                  }
-                )),
-              ],
-            )),
-          ]))
-        ]
-
-        //'Phone Number'
-        else if (input1 == questions[4]) ...[
-        Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
-          child: Stack(
-            children: [
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height: 49,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(2),
-              border: Border.all(
-                color: Colors.black,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Flexible(
-                child: TextFormField(
-                  enabled: editable,
-                  focusNode: FocusNode(),
-                  enableInteractiveSelection: editable,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r"[0-9\+-]")),
-                  ],
-                  controller: myController[4],
-                  style: GoogleFonts.signikaNegative(fontSize: 18,color: Colors.black),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Please enter your ${input1.toLowerCase()}',
-                  ),
-                  onSaved: (String? value) {
-                    //save
-                    print("saved");
-                  },
-                  validator: (String? value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your ${input1.toLowerCase()}';
-                    } else {
-                      if (isPhone(value)) {
-                        return null;
-                      } else {
-                        return 'Please enter a valid ${input1.toLowerCase()}';
-                      }
-                    }
-                  }
-                )),
-              ],
-            )),
-          ]))
-        ]
-
         // Date of Birth
-        else if (input1 == questions[5]) ...[
+        else if (input1 == 'Date of Birth') ...[
         Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
           child: Stack(
@@ -505,7 +233,7 @@ class _ProfileTabState extends State<ProfileTab> with InputValidationMixin {
                       enabled: editable,
                       focusNode: FocusNode(),
                       enableInteractiveSelection: editable,
-                      controller: myController[5],
+                      controller: myController[index],
                       style: GoogleFonts.signikaNegative(fontSize: 18,color: Colors.black),
                       decoration: InputDecoration(
                         hintText: 'Please enter your ${input1.toLowerCase()}',
@@ -520,7 +248,7 @@ class _ProfileTabState extends State<ProfileTab> with InputValidationMixin {
                           lastDate: DateTime.now()
                         );
                         if (date != null){
-                          myController[5].text = DateFormat("dd/MM/yyyy").format(date);
+                          myController[index].text = DateFormat("dd/MM/yyyy").format(date);
                         }
                       },
                       onSaved: (String? value) {
@@ -542,7 +270,7 @@ class _ProfileTabState extends State<ProfileTab> with InputValidationMixin {
         ]
 
         // Gender
-        else if (input1 == questions[6]) ...[
+        else if (input1 == 'Gender') ...[
         Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
           child: Container(
@@ -562,7 +290,7 @@ class _ProfileTabState extends State<ProfileTab> with InputValidationMixin {
                   // Flexible(
                     if (editable == false)...[
                       Text(
-                        myController[6].text,
+                        myController[index].text,
                         style: GoogleFonts.signikaNegative(fontSize: 18,color: Colors.black),
                       ),
                     ]
@@ -571,12 +299,12 @@ class _ProfileTabState extends State<ProfileTab> with InputValidationMixin {
                     child: DropdownButtonHideUnderline(
                       child:DropdownButton<String>(
                       isExpanded: true,
-                      value: myController[6].text,
+                      value: myController[index].text,
                       style: GoogleFonts.signikaNegative(fontSize: 18,color: Colors.black),
                       icon: const Icon(Icons.keyboard_arrow_down),
                       onChanged: (String? newValue){
                         setState(() {
-                           myController[6].text = newValue!;
+                           myController[index].text = newValue!;
                         });
                       },
                       items: <String>['Male','Female']
@@ -595,7 +323,7 @@ class _ProfileTabState extends State<ProfileTab> with InputValidationMixin {
         ]
 
         // Drug Allergies
-        else if (input1 == questions[7]) ...[
+        else if (input1 == 'Drug Allergies') ...[
         Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
           child: Container(
@@ -617,7 +345,7 @@ class _ProfileTabState extends State<ProfileTab> with InputValidationMixin {
                     enabled: editable,
                     focusNode: FocusNode(),
                     enableInteractiveSelection: editable,
-                    controller:  myController[7],
+                    controller:  myController[index],
                     style: GoogleFonts.signikaNegative(fontSize: 18,color: Colors.black),
                     decoration: const InputDecoration(
                       border: InputBorder.none,
