@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../model/medication.dart';
+import 'notification_service.dart';
 import 'package:intl/intl.dart';
 
 class MedicationScheduleItem {
@@ -88,6 +89,11 @@ class MedicationService {
     medicationsNotifier.value = demos;
     String jsonString = jsonEncode(demos.map((m) => m.toJson()).toList());
     await prefs.setString('medications', jsonString);
+
+    // Schedule notifications for demos
+    for (var med in demos) {
+      await NotificationService().scheduleMedicationReminders(med);
+    }
   }
 
   Future<void> addMedication(Medication med) async {
@@ -101,6 +107,10 @@ class MedicationService {
     // Persist
     String jsonString = jsonEncode(currentMeds.map((m) => m.toJson()).toList());
     await prefs.setString('medications', jsonString);
+
+    // Schedule Notifications
+    await NotificationService().scheduleMedicationReminders(med);
+
     notifyUpdate();
   }
 
@@ -109,6 +119,10 @@ class MedicationService {
     List<Medication> currentMeds = List.from(medicationsNotifier.value);
 
     if (index >= 0 && index < currentMeds.length) {
+      // Cancel old reminders
+      Medication oldMed = currentMeds[index];
+      await NotificationService().cancelMedicationReminders(oldMed);
+
       currentMeds[index] = med;
 
       // Update State
@@ -117,6 +131,10 @@ class MedicationService {
       // Persist
       String jsonString = jsonEncode(currentMeds.map((m) => m.toJson()).toList());
       await prefs.setString('medications', jsonString);
+
+      // Schedule new reminders
+      await NotificationService().scheduleMedicationReminders(med);
+
       notifyUpdate();
     }
   }
@@ -126,6 +144,9 @@ class MedicationService {
     List<Medication> currentMeds = List.from(medicationsNotifier.value);
 
     if (index >= 0 && index < currentMeds.length) {
+      Medication med = currentMeds[index];
+      await NotificationService().cancelMedicationReminders(med);
+
       currentMeds.removeAt(index);
 
       // Update State

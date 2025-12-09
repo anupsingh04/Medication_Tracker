@@ -18,6 +18,8 @@ dependencies:
   url_launcher: ^6.2.5
   path_provider: ^2.1.2 # Often needed, good to have
   image_picker: ^1.0.7 # Added for photo functionality
+  flutter_local_notifications: ^17.1.0 # Notifications
+  timezone: ^0.9.2 # Timezone support for notifications
 
   # UI & Widgets
   cupertino_icons: ^1.0.6
