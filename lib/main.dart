@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'nav.dart';
+import 'controller/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().init();
   runApp(const MyApp());
 }
 
@@ -11,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override 
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Medimate',
+      title: 'Meditrak',
       home: Nav(), // Redirect directly to Homepage (Nav)
     );
   }
